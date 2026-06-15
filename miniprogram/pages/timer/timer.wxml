@@ -1,0 +1,69 @@
+<!-- pages/timer/timer.wxml -->
+<view class="page">
+  <!-- 顶部标题区 -->
+  <view class="header">
+    <view class="header-title">飞行计时</view>
+    <view class="header-sub">开始计时即记录起飞时间，结束计时记录降落时间</view>
+  </view>
+  <!-- 计时器主体 -->
+  <view class="timer-card">
+    <!-- 状态指示 -->
+    <view class="status-badge {{timerState === 'running' ? 'status-running' : (timerState === 'done' ? 'status-done' : 'status-idle')}}">
+      <view wx:if="{{timerState === 'idle'}}" class="status-dot" />
+      <view wx:elif="{{timerState === 'running'}}" class="status-dot status-dot--blink" />
+      <view wx:else class="status-dot status-dot--done" />
+      <text>{{timerState === 'idle' ? '待机' : (timerState === 'running' ? '飞行中' : '已降落')}}</text>
+    </view>
+    <!-- 大秒表数字 -->
+    <view class="clock-face">
+      <text class="clock-text">{{displayTime}}</text>
+    </view>
+    <!-- 起飞/降落时间展示 -->
+    <view class="time-info">
+      <view class="time-item">
+        <text class="time-label">起飞时间</text>
+        <text class="time-value {{takeoffTime ? '' : 'time-value--empty'}}">
+          {{takeoffTime || '--:--:--'}}
+        </text>
+      </view>
+      <view class="time-divider" />
+      <view class="time-item">
+        <text class="time-label">降落时间</text>
+        <text class="time-value {{landingTime ? '' : 'time-value--empty'}}">
+          {{landingTime || '--:--:--'}}
+        </text>
+      </view>
+    </view>
+    <!-- 飞行日期 -->
+    <view class="date-row">
+      <t-icon name="calendar" size="32rpx" color="#0052d9" />
+      <text class="date-text">飞行日期：{{flightDate}}</text>
+    </view>
+  </view>
+  <!-- 操作按钮区 -->
+  <view class="action-area">
+    <!-- 待机状态：显示开始按钮 -->
+    <view wx:if="{{timerState === 'idle'}}" class="btn-start" bindtap="onStart">
+      <text class="btn-text">开始飞行计时</text>
+    </view>
+    <!-- 飞行中：显示结束按钮 -->
+    <view wx:elif="{{timerState === 'running'}}" class="btn-stop" bindtap="onStop">
+      <text class="btn-text">结束飞行</text>
+    </view>
+    <!-- 完成状态：显示填报按钮和重置 -->
+    <view wx:else class="btn-group">
+      <view class="btn-fill" bindtap="onGoReport">
+        <t-icon name="edit" size="40rpx" color="#fff" />
+        <text class="btn-fill-text">进入填报页面</text>
+      </view>
+      <view class="btn-reset" bindtap="onReset">
+        <t-icon name="refresh" size="36rpx" color="#0052d9" />
+        <text class="btn-reset-text">重新计时</text>
+      </view>
+    </view>
+  </view>
+  <!-- 跳过提示 -->
+  <view class="skip-row" wx:if="{{timerState === 'idle'}}">
+    <text class="skip-link" bindtap="onSkip">跳过计时，直接填报</text>
+  </view>
+</view>

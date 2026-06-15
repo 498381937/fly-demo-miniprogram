@@ -1,0 +1,22 @@
+// tools.wxs 通用格式化
+var pad = function (n) {
+  return n < 10 ? '0' + n : '' + n;
+};
+
+var formatDuration = function (sec) {
+  sec = sec || 0;
+  var h = Math.floor(sec / 3600);
+  var m = Math.floor((sec % 3600) / 60);
+  var s = sec % 60;
+  return pad(h) + ':' + pad(m) + ':' + pad(s);
+};
+
+var hours = function (sec) {
+  sec = sec || 0;
+  return (sec / 3600).toFixed(1);
+};
+
+module.exports = {
+  formatDuration: formatDuration,
+  hours: hours,
+};

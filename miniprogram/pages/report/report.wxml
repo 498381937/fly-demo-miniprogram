@@ -1,0 +1,317 @@
+<!-- pages/report/report.wxml -->
+<view class="page">
+  <t-tabs defaultValue="{{activeTab}}" value="{{activeTab}}" bindchange="onTabsChange" theme="card">
+    <t-tab-panel label="基础信息" value="{{0}}">
+      <view class="container">
+        <view class="card">
+          <view class="section-title">基础信息（必填项标*）</view>
+          <view class="form-row">
+            <view class="form-label">日志编号</view>
+            <view class="form-value primary-color">{{logCode || '生成中...'}}</view>
+          </view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              飞行日期
+            </view>
+            <view class="form-value">
+              <picker mode="date" value="{{flightDate}}" bindchange="onDateChange">
+                <view class="{{flightDate ? '' : 'placeholder-gray'}}">
+                  {{flightDate || '请选择飞行日期'}}
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.flightDate}}" class="text-error">{{errors.flightDate}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              起飞时间
+            </view>
+            <view class="form-value">
+              <picker mode="time" value="{{takeoffTime}}" bindchange="onTakeoffTimeChange">
+                <view class="{{takeoffTime ? '' : 'placeholder-gray'}}">
+                  {{takeoffTime || '请选择起飞时间'}}
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.takeoffTime}}" class="text-error">{{errors.takeoffTime}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              降落时间
+            </view>
+            <view class="form-value">
+              <picker mode="time" value="{{landingTime}}" bindchange="onLandingTimeChange">
+                <view class="{{landingTime ? '' : 'placeholder-gray'}}">
+                  {{landingTime || '请选择降落时间'}}
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.landingTime}}" class="text-error">{{errors.landingTime}}</view>
+          <view class="form-row">
+            <view class="form-label">总飞行时长</view>
+            <view class="form-value primary-color">{{totalDuration || '自动计算'}}</view>
+          </view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              驾驶员姓名
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="请输入学生/飞行员姓名" value="{{pilotName}}" data-field="pilotName" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.pilotName}}" class="text-error">{{errors.pilotName}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              学号/执照编号
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="学生填学号，持证者填执照号" value="{{pilotId}}" data-field="pilotId" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.pilotId}}" class="text-error">{{errors.pilotId}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              班级/所属单位
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="如：无人机22级1班" value="{{className}}" data-field="className" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.className}}" class="text-error">{{errors.className}}</view>
+          <view class="form-row">
+            <view class="form-label">指导教师</view>
+            <view class="form-value">
+              <input class="input" placeholder="实训飞行必填" value="{{teacher}}" data-field="teacher" bindinput="onInput" />
+            </view>
+          </view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              无人机型号
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{droneModels}}" value="{{droneModelIndex}}" bindchange="onDroneModelPick">
+                <view class="{{droneModel ? '' : 'placeholder-gray'}}">
+                  {{droneModel || '请选择无人机型号'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.droneModel}}" class="text-error">{{errors.droneModel}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              机身SN号
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="机身贴纸上的唯一编号" value="{{bodySn}}" data-field="bodySn" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.bodySn}}" class="text-error">{{errors.bodySn}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              电池SN号
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="电池上的唯一编号" value="{{batterySn}}" data-field="batterySn" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.batterySn}}" class="text-error">{{errors.batterySn}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              任务类型
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{missionTypes}}" value="{{missionTypeIndex}}" bindchange="onMissionTypePick">
+                <view class="{{missionType ? '' : 'placeholder-gray'}}">
+                  {{missionType || '请选择飞行任务类型'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.missionType}}" class="text-error">{{errors.missionType}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              空域报备
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{airspaceCodes}}" value="{{airspaceCodeIndex}}" bindchange="onAirspaceCodePick">
+                <view class="{{airspaceCode ? '' : 'placeholder-gray'}}">
+                  {{airspaceCode || '请选择空域报备'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.airspaceCode}}" class="text-error">{{errors.airspaceCode}}</view>
+        </view>
+      </view>
+    </t-tab-panel>
+    <t-tab-panel label="飞行数据" value="{{1}}">
+      <view class="container">
+        <view class="card">
+          <view class="section-title">飞行数据（多旋翼专属）</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              最大高度(AGL)
+            </view>
+            <view class="form-value unit-cell">
+              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxAltitude}}" data-field="maxAltitude" bindinput="onInput" />
+              <text class="unit">米</text>
+            </view>
+          </view>
+          <view wx:if="{{errors.maxAltitude}}" class="text-error">{{errors.maxAltitude}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              最大水平速度
+            </view>
+            <view class="form-value unit-cell">
+              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxHorizontalSpeed}}" data-field="maxHorizontalSpeed" bindinput="onInput" />
+              <text class="unit">m/s</text>
+            </view>
+          </view>
+          <view wx:if="{{errors.maxHorizontalSpeed}}" class="text-error">
+            {{errors.maxHorizontalSpeed}}
+          </view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              最大垂直速度
+            </view>
+            <view class="form-value unit-cell">
+              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxVerticalSpeed}}" data-field="maxVerticalSpeed" bindinput="onInput" />
+              <text class="unit">m/s</text>
+            </view>
+          </view>
+          <view wx:if="{{errors.maxVerticalSpeed}}" class="text-error">
+            {{errors.maxVerticalSpeed}}
+          </view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              起飞电量(SOC)
+            </view>
+            <view class="form-value unit-cell">
+              <input class="input" type="number" placeholder="整数，无需填%" value="{{takeoffSoc}}" data-field="takeoffSoc" bindinput="onInput" />
+              <text class="unit">%</text>
+            </view>
+          </view>
+          <view wx:if="{{errors.takeoffSoc}}" class="text-error">{{errors.takeoffSoc}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              降落电量(SOC)
+            </view>
+            <view class="form-value unit-cell">
+              <input class="input" type="number" placeholder="整数，无需填%" value="{{landingSoc}}" data-field="landingSoc" bindinput="onInput" />
+              <text class="unit">%</text>
+            </view>
+          </view>
+          <view wx:if="{{errors.landingSoc}}" class="text-error">{{errors.landingSoc}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              飞行模式
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{flightModes}}" value="{{flightModeIndex}}" bindchange="onFlightModePick">
+                <view class="{{flightMode ? '' : 'placeholder-gray'}}">
+                  {{flightMode || '请选择飞行模式'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.flightMode}}" class="text-error">{{errors.flightMode}}</view>
+          <view class="form-row">
+            <view class="form-label">悬停精度</view>
+            <view class="form-value unit-cell">
+              <input class="input" placeholder="格式：水平/垂直，如 0.5/0.3" value="{{hoverAccuracy}}" data-field="hoverAccuracy" bindinput="onInput" />
+              <text class="unit">米</text>
+            </view>
+          </view>
+          <view class="form-row" style="align-items: flex-start;">
+            <view class="form-label">
+              <text class="required">*</text>
+              天气情况
+            </view>
+            <view class="form-value">
+              <input class="input" placeholder="如：3-4级风 25℃ 能见度良好" value="{{weather}}" data-field="weather" bindinput="onInput" />
+            </view>
+          </view>
+          <view wx:if="{{errors.weather}}" class="text-error">{{errors.weather}}</view>
+        </view>
+      </view>
+    </t-tab-panel>
+    <t-tab-panel label="异常与备注" value="{{2}}">
+      <view class="container">
+        <view class="card">
+          <view class="section-title">异常与备注（安全追溯+教学复盘）</view>
+          <view class="multiline-label">
+            <text class="required">*</text>
+            告警/故障记录
+          </view>
+          <textarea class="textarea" placeholder="无异常填「无」，详细描述异常情况" value="{{warningLog}}" data-field="warningLog" bindinput="onInput" maxlength="500" auto-height />
+          <view wx:if="{{errors.warningLog}}" class="text-error">{{errors.warningLog}}</view>
+          <view class="multiline-label mt20">
+            <text class="required">*</text>
+            应急操作记录
+          </view>
+          <textarea class="textarea" placeholder="无应急操作填「无」，描述操作过程" value="{{emergencyLog}}" data-field="emergencyLog" bindinput="onInput" maxlength="500" auto-height />
+          <view wx:if="{{errors.emergencyLog}}" class="text-error">{{errors.emergencyLog}}</view>
+          <view class="form-row mt20">
+            <view class="form-label">
+              <text class="required">*</text>
+              飞行前检查
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{checkResults}}" value="{{preCheckResultIndex}}" bindchange="onCheckResultPick">
+                <view class="{{preCheckResult === '不合格' ? 'danger' : ''}}">
+                  {{preCheckResult || '合格'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.preCheckResult}}" class="text-error">
+            {{errors.preCheckResult}}
+          </view>
+          <view class="multiline-label mt20">教师评语/飞行总结</view>
+          <textarea class="textarea" placeholder="实训必填，填写操作评价与建议" value="{{teacherComment}}" data-field="teacherComment" bindinput="onInput" maxlength="500" auto-height />
+          <view class="multiline-label mt20">
+            <text class="required">*</text>
+            记录人电子签名
+          </view>
+          <view class="signature-box" bindtap="openSignature">
+            <image wx:if="{{signatureImage}}" src="{{signatureImage}}" mode="aspectFit" class="signature-img" />
+            <view wx:else class="signature-placeholder">
+              <t-icon name="edit" size="48rpx" color="#0052d9" />
+              <text>点击此处手写签名</text>
+            </view>
+          </view>
+          <view class="signature-actions" wx:if="{{signatureImage}}">
+            <view class="link" bindtap="clearSignature">清除签名</view>
+            <view class="link" bindtap="openSignature">重新签名</view>
+          </view>
+        </view>
+      </view>
+    </t-tab-panel>
+  </t-tabs>
+  <view class="bottom-spacer" />
+  <view class="btn-bar">
+    <t-button theme="default" bindtap="onReset">重置</t-button>
+    <t-button theme="light" bindtap="onSaveDraft">保存草稿</t-button>
+    <t-button theme="primary" loading="{{submitting}}" bindtap="onSubmit">
+      {{editId ? '保存修改' : '提交日志'}}
+    </t-button>
+  </view>
+</view>

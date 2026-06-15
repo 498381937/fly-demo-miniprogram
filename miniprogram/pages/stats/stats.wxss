@@ -1,0 +1,168 @@
+.page {
+  padding: 24rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+/* 管理员 scope 切换栏 */
+.scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 16rpx;
+  background: #fff;
+  border-radius: 48rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, .04);
+}
+
+.scope-item {
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f0f3f8;
+}
+
+.scope-item.active {
+  background: #0052d9;
+  color: #fff;
+  font-weight: 600;
+}
+
+.scope-badge {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #b8860b;
+  background: #fff8e1;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.summary {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.sm-card {
+  flex: 1;
+  background: linear-gradient(135deg, #0052d9, #4a90ff);
+  color: #fff;
+  padding: 28rpx;
+  border-radius: 16rpx;
+}
+
+.sm-card:nth-child(2) {
+  background: linear-gradient(135deg, #ed7b2f, #ffae6d);
+}
+
+.sm-num {
+  font-size: 48rpx;
+  font-weight: 700;
+}
+
+.sm-label {
+  font-size: 24rpx;
+  opacity: .9;
+  margin-top: 4rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .04);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #0052d9;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: '';
+  width: 8rpx;
+  height: 28rpx;
+  background: #0052d9;
+  margin-right: 12rpx;
+  border-radius: 4rpx;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20rpx 0 0;
+  min-height: 280rpx;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.bar {
+  width: 40rpx;
+  background: linear-gradient(180deg, #4a90ff, #0052d9);
+  border-radius: 8rpx 8rpx 0 0;
+}
+
+.bar-value {
+  font-size: 22rpx;
+  color: #0052d9;
+}
+
+.bar-label {
+  font-size: 18rpx;
+  color: #888;
+  margin-top: 4rpx;
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 14rpx 0;
+}
+
+.dist-name {
+  width: 160rpx;
+  font-size: 26rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.dist-bar-wrap {
+  flex: 1;
+  background: #f0f3f8;
+  height: 16rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.dist-bar {
+  background: linear-gradient(90deg, #4a90ff, #0052d9);
+  height: 100%;
+  border-radius: 8rpx;
+}
+
+.dist-bar.mission {
+  background: linear-gradient(90deg, #ffae6d, #ed7b2f);
+}
+
+.dist-count {
+  width: 200rpx;
+  font-size: 24rpx;
+  color: #666;
+  text-align: right;
+  flex-shrink: 0;
+}

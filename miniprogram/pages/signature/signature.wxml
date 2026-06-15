@@ -1,0 +1,15 @@
+<view class="sign-page">
+  <view class="sign-tip">请在下方空白区域手写签名</view>
+  <canvas
+    canvas-id="signCanvas"
+    id="signCanvas"
+    class="sign-canvas"
+    disable-scroll="true"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+  />
+  <view class="sign-actions">
+    <t-button theme="default" bindtap="clear">清除</t-button>
+    <t-button theme="primary" bindtap="save">保存签名</t-button>
+  </view>
+</view>

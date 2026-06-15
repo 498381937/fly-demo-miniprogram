@@ -1,0 +1,65 @@
+<view class="page">
+  <wxs src="../../utils/tools.wxs" module="tools" />
+  <view class="hero">
+    <view class="hero-title">🚁 多旋翼无人机</view>
+    <view class="hero-sub">飞行云日志填报系统</view>
+    <view class="hero-stats">
+      <view class="stat">
+        <view class="stat-num">{{stats.totalFlights}}</view>
+        <view class="stat-label">累计飞行</view>
+      </view>
+      <view class="stat-divider" />
+      <view class="stat">
+        <view class="stat-num">{{tools.hours(stats.totalDurationSeconds)}} h</view>
+        <view class="stat-label">总飞行时长</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="quick-actions">
+    <view class="qa-item" bindtap="goReport">
+      <view class="qa-icon" style="background:#e8f3ff;color:#0052d9;">✍️</view>
+      <view class="qa-label">填报日志</view>
+    </view>
+    <view class="qa-item" bindtap="goQuery">
+      <view class="qa-icon" style="background:#fff4e5;color:#ed7b2f;">📋</view>
+      <view class="qa-label">日志查询</view>
+    </view>
+    <view class="qa-item" bindtap="goStats">
+      <view class="qa-icon" style="background:#e8f7ec;color:#2ba471;">📊</view>
+      <view class="qa-label">数据统计</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-header">
+      <view class="section-title">最近日志</view>
+      <view class="more-link" bindtap="goQuery">查看更多 ›</view>
+    </view>
+    <t-empty wx:if="{{!loading && recentList.length === 0}}" description="暂无日志记录" />
+    <view
+      wx:for="{{recentList}}"
+      wx:key="_id"
+      class="log-item"
+      data-id="{{item._id}}"
+      bindtap="goDetail"
+    >
+      <view class="log-item-header">
+        <view class="log-code">{{item.logCode}}</view>
+        <t-tag
+          size="small"
+          theme="{{item.preCheckResult === '合格' ? 'success' : 'danger'}}"
+          variant="light"
+        >
+          {{item.preCheckResult}}
+        </t-tag>
+      </view>
+      <view class="log-item-body">
+        <text>{{item.flightDate}} {{item.takeoffTime}} - {{item.landingTime}}</text>
+      </view>
+      <view class="log-item-foot">
+        <text>{{item.pilotName}} · {{item.droneModel}} · {{item.missionType}}</text>
+      </view>
+    </view>
+  </view>
+</view>

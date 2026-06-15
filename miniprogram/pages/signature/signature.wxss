@@ -1,0 +1,32 @@
+.sign-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.sign-tip {
+  color: #666;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+}
+
+.sign-canvas {
+  flex: 1;
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .06);
+  width: 100%;
+}
+
+.sign-actions {
+  display: flex;
+  gap: 20rpx;
+  padding: 24rpx 0 0;
+}
+
+.sign-actions t-button {
+  flex: 1;
+}

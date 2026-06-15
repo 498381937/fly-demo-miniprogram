@@ -1,0 +1,177 @@
+.page {
+  padding: 24rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.search-bar {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  background: #fff;
+  padding: 20rpx 24rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  background: #0052d9;
+  color: #fff;
+  padding: 20rpx 36rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+}
+
+.date-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  color: #555;
+}
+
+.date-picker {
+  padding: 8rpx 12rpx;
+  border-bottom: 1rpx solid #e6eaf0;
+  min-width: 200rpx;
+  text-align: center;
+}
+
+.date-sep {
+  color: #888;
+}
+
+.date-clear {
+  margin-left: auto;
+  color: #0052d9;
+}
+
+/* 管理员 scope 切换栏 */
+.scope-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 16rpx;
+  background: #fff;
+  border-radius: 48rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, .04);
+}
+
+.scope-item {
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f0f3f8;
+}
+
+.scope-item.active {
+  background: #0052d9;
+  color: #fff;
+  font-weight: 600;
+}
+
+.scope-badge {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #b8860b;
+  background: #fff8e1;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.count-tip {
+  color: #888;
+  font-size: 24rpx;
+  padding: 0 8rpx 12rpx;
+}
+
+.count-scope {
+  color: #0052d9;
+  margin-left: 8rpx;
+}
+
+.owner-row .owner {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 22rpx;
+  color: #888;
+  word-break: break-all;
+}
+
+.log-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .04);
+}
+
+.log-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.log-code {
+  color: #0052d9;
+  font-weight: 600;
+  font-size: 28rpx;
+}
+
+.log-card-body {
+  padding-top: 12rpx;
+}
+
+.row {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.8;
+  display: flex;
+}
+
+.k {
+  color: #888;
+  width: 130rpx;
+  flex-shrink: 0;
+}
+
+.v {
+  flex: 1;
+  word-break: break-all;
+}
+
+.log-card-actions {
+  display: flex;
+  gap: 40rpx;
+  padding-top: 16rpx;
+  margin-top: 12rpx;
+  border-top: 1rpx solid #f0f0f0;
+  justify-content: flex-end;
+}
+
+.action {
+  color: #0052d9;
+  font-size: 26rpx;
+}
+
+.action.danger {
+  color: #e34d59;
+}
+
+.no-more {
+  text-align: center;
+  color: #bbb;
+  font-size: 24rpx;
+  padding: 30rpx 0;
+}

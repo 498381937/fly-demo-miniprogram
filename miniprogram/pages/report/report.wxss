@@ -1,0 +1,115 @@
+/* pages/report/report.wxss */
+.page {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.input {
+  width: 100%;
+  font-size: 28rpx;
+  color: #333;
+  text-align: left;
+}
+
+.location-cell {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.locate-btn {
+  padding: 6rpx 18rpx;
+  border: 1rpx solid #0052d9;
+  color: #0052d9;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.unit-cell {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.unit {
+  color: #999;
+  font-size: 26rpx;
+}
+
+.multiline-label {
+  font-size: 28rpx;
+  color: #333;
+  padding: 16rpx 0 12rpx;
+}
+
+.mt20 {
+  margin-top: 20rpx;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 160rpx;
+  background: #f7f9fc;
+  border: 1rpx solid #e6eaf0;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.danger {
+  color: #e34d59;
+  font-weight: 600;
+}
+
+.sync-btn {
+  margin: 24rpx auto 0;
+  width: 60%;
+  background: linear-gradient(135deg, #0052d9, #366ef4);
+  color: #fff;
+  text-align: center;
+  padding: 20rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.signature-box {
+  margin-top: 12rpx;
+  background: #f7f9fc;
+  border: 1rpx dashed #b8c1d6;
+  border-radius: 12rpx;
+  height: 220rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.signature-img {
+  width: 100%;
+  height: 100%;
+}
+
+.signature-placeholder {
+  color: #0052d9;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+}
+
+.signature-actions {
+  display: flex;
+  gap: 30rpx;
+  padding-top: 16rpx;
+}
+
+.link {
+  color: #0052d9;
+  font-size: 26rpx;
+}

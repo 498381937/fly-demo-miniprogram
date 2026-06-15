@@ -1,0 +1,108 @@
+<view class="page">
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="搜索日志编号 / 姓名 / 机型 / 任务类型"
+      value="{{keyword}}"
+      bindinput="onSearchChange"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <view class="date-bar">
+    <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+      <view class="date-picker">
+        {{startDate || '起始日期'}}
+      </view>
+    </picker>
+    <text class="date-sep">~</text>
+    <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+      <view class="date-picker">
+        {{endDate || '结束日期'}}
+      </view>
+    </picker>
+    <view
+      wx:if="{{startDate || endDate}}"
+      class="date-clear"
+      bindtap="clearDates"
+    >清除</view>
+  </view>
+
+  <!-- 管理员切换：仅管理员可见 -->
+  <view class="scope-bar" wx:if="{{isAdmin}}">
+    <view
+      class="scope-item {{scope === 'mine' ? 'active' : ''}}"
+      data-scope="mine"
+      bindtap="onScopeChange"
+    >仅我的</view>
+    <view
+      class="scope-item {{scope === 'all' ? 'active' : ''}}"
+      data-scope="all"
+      bindtap="onScopeChange"
+    >全部用户</view>
+    <view class="scope-badge">👑 管理员</view>
+  </view>
+
+  <view class="count-tip" wx:if="{{total > 0}}">
+    共 {{total}} 条记录
+    <text wx:if="{{isAdmin && scope === 'all'}}" class="count-scope">· 全部用户</text>
+  </view>
+
+  <t-empty
+    wx:if="{{!loading && list.length === 0}}"
+    description="暂无日志记录"
+  />
+
+  <view
+    wx:for="{{list}}"
+    wx:key="_id"
+    class="log-card"
+  >
+    <view class="log-card-header" data-id="{{item._id}}" bindtap="goDetail">
+      <view class="log-code">{{item.logCode}}</view>
+      <t-tag
+        size="small"
+        theme="{{item.preCheckResult === '合格' ? 'success' : 'danger'}}"
+        variant="light"
+      >
+        {{item.preCheckResult}}
+      </t-tag>
+    </view>
+    <view class="log-card-body" data-id="{{item._id}}" bindtap="goDetail">
+      <view class="row">
+        <text class="k">日期：</text>
+        <text class="v">{{item.flightDate}}</text>
+      </view>
+      <view class="row">
+        <text class="k">时间：</text>
+        <text class="v">{{item.takeoffTime}} → {{item.landingTime}}（{{item.totalDuration}}）</text>
+      </view>
+      <view class="row">
+        <text class="k">驾驶员：</text>
+        <text class="v">{{item.pilotName}} · {{item.className}}</text>
+      </view>
+      <view class="row">
+        <text class="k">机型：</text>
+        <text class="v">{{item.droneModel}}</text>
+      </view>
+      <view class="row">
+        <text class="k">任务：</text>
+        <text class="v">{{item.missionType}}</text>
+      </view>
+      <!-- 管理员视角下显示所属用户 openid 末尾 -->
+      <view class="row owner-row" wx:if="{{isAdmin && scope === 'all' && item._openid}}">
+        <text class="k">归属：</text>
+        <text class="v owner">{{item._openid}}</text>
+      </view>
+    </view>
+    <view class="log-card-actions">
+      <view class="action" data-id="{{item._id}}" bindtap="goDetail">查看</view>
+      <view class="action" data-id="{{item._id}}" bindtap="goEdit">编辑</view>
+      <view class="action danger" data-id="{{item._id}}" bindtap="onDelete">删除</view>
+    </view>
+  </view>
+
+  <view wx:if="{{list.length > 0 && !hasMore}}" class="no-more">— 到底了 —</view>
+</view>

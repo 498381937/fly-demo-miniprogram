@@ -1,0 +1,9 @@
+{
+  "name": "fly-demo-miniprogram",
+  "version": "1.0.0",
+  "description": "多旋翼无人机飞行云日志填报微信小程序",
+  "private": true,
+  "dependencies": {
+    "tdesign-miniprogram": "^1.7.0"
+  }
+}

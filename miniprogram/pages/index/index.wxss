@@ -1,0 +1,135 @@
+.page {
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.hero {
+  background: linear-gradient(135deg, #0052d9 0%, #4a90ff 100%);
+  color: #fff;
+  padding: 48rpx 32rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 82, 217, .25);
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.hero-sub {
+  font-size: 28rpx;
+  opacity: .9;
+  margin-top: 8rpx;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 36rpx;
+  background: rgba(255, 255, 255, .15);
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  opacity: .85;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 48rpx;
+  background: rgba(255, 255, 255, .3);
+}
+
+.quick-actions {
+  display: flex;
+  gap: 16rpx;
+  margin: 24rpx 0;
+}
+
+.qa-item {
+  flex: 1;
+  background: #fff;
+  border-radius: 16rpx;
+  text-align: center;
+  padding: 32rpx 0;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .04);
+}
+
+.qa-icon {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  line-height: 84rpx;
+  font-size: 42rpx;
+  margin: 0 auto 12rpx;
+}
+
+.qa-label {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .04);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.more-link {
+  color: #0052d9;
+  font-size: 26rpx;
+}
+
+.log-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.log-item:last-child {
+  border-bottom: 0;
+}
+
+.log-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.log-code {
+  color: #0052d9;
+  font-weight: 600;
+  font-size: 28rpx;
+}
+
+.log-item-body {
+  color: #333;
+  font-size: 26rpx;
+  margin-top: 8rpx;
+}
+
+.log-item-foot {
+  color: #888;
+  font-size: 24rpx;
+  margin-top: 6rpx;
+}
