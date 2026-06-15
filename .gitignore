@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+miniprogram/miniprogram_npm/
+.idea/
+.vscode/
+.agents/
+.codebuddy
+*.log

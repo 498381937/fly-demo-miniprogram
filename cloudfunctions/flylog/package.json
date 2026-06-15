@@ -1,0 +1,9 @@
+{
+  "name": "flylog",
+  "version": "1.0.0",
+  "description": "飞行日志云函数：负责日志的增删改查、统计、编号生成",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
