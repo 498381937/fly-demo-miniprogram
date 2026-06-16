@@ -123,6 +123,13 @@
   border-bottom: 1rpx solid #f0f0f0;
 }
 
+.card-tags {
+  display: flex;
+  gap: 8rpx;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .log-code {
   color: #0052d9;
   font-weight: 600;

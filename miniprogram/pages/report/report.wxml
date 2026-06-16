@@ -52,7 +52,10 @@
           </view>
           <view wx:if="{{errors.landingTime}}" class="text-error">{{errors.landingTime}}</view>
           <view class="form-row">
-            <view class="form-label">总飞行时长</view>
+            <view class="form-label">
+              <text class="required">*</text>
+              总飞行时长
+            </view>
             <view class="form-value primary-color">{{totalDuration || '自动计算'}}</view>
           </view>
           <view class="form-row">
@@ -86,11 +89,33 @@
           </view>
           <view wx:if="{{errors.className}}" class="text-error">{{errors.className}}</view>
           <view class="form-row">
-            <view class="form-label">指导教师</view>
+            <view class="form-label">
+              <text class="required">*</text>
+              指导教师
+            </view>
             <view class="form-value">
-              <input class="input" placeholder="实训飞行必填" value="{{teacher}}" data-field="teacher" bindinput="onInput" />
+              <picker mode="selector" range="{{instructorList}}" range-key="realName" value="{{teacherIndex}}" bindchange="onTeacherPick" disabled="{{instructorList.length === 0}}">
+                <view class="{{teacher ? '' : 'placeholder-gray'}}">
+                  {{teacher || (instructorList.length === 0 ? '暂无教师（请先完成注册）' : '请选择指导教师')}} ▼
+                </view>
+              </picker>
             </view>
           </view>
+          <view wx:if="{{errors.teacher}}" class="text-error">{{errors.teacher}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              安全员
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{personnelList}}" range-key="realName" value="{{safetyOfficerIndex}}" bindchange="onSafetyOfficerPick" disabled="{{personnelList.length === 0}}">
+                <view class="{{safetyOfficer ? '' : 'placeholder-gray'}}">
+                  {{safetyOfficer || (personnelList.length === 0 ? '暂无人员（请先完成注册）' : '请选择安全员')}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.safetyOfficer}}" class="text-error">{{errors.safetyOfficer}}</view>
           <view class="form-row">
             <view class="form-label">
               <text class="required">*</text>
@@ -108,26 +133,6 @@
           <view class="form-row">
             <view class="form-label">
               <text class="required">*</text>
-              机身SN号
-            </view>
-            <view class="form-value">
-              <input class="input" placeholder="机身贴纸上的唯一编号" value="{{bodySn}}" data-field="bodySn" bindinput="onInput" />
-            </view>
-          </view>
-          <view wx:if="{{errors.bodySn}}" class="text-error">{{errors.bodySn}}</view>
-          <view class="form-row">
-            <view class="form-label">
-              <text class="required">*</text>
-              电池SN号
-            </view>
-            <view class="form-value">
-              <input class="input" placeholder="电池上的唯一编号" value="{{batterySn}}" data-field="batterySn" bindinput="onInput" />
-            </view>
-          </view>
-          <view wx:if="{{errors.batterySn}}" class="text-error">{{errors.batterySn}}</view>
-          <view class="form-row">
-            <view class="form-label">
-              <text class="required">*</text>
               任务类型
             </view>
             <view class="form-value">
@@ -139,6 +144,20 @@
             </view>
           </view>
           <view wx:if="{{errors.missionType}}" class="text-error">{{errors.missionType}}</view>
+          <view class="form-row">
+            <view class="form-label">
+              <text class="required">*</text>
+              飞行模式
+            </view>
+            <view class="form-value">
+              <picker mode="selector" range="{{flightModes}}" value="{{flightModeIndex}}" bindchange="onFlightModePick">
+                <view class="{{flightMode ? '' : 'placeholder-gray'}}">
+                  {{flightMode || '请选择飞行模式'}} ▼
+                </view>
+              </picker>
+            </view>
+          </view>
+          <view wx:if="{{errors.flightMode}}" class="text-error">{{errors.flightMode}}</view>
           <view class="form-row">
             <view class="form-label">
               <text class="required">*</text>
@@ -156,137 +175,78 @@
         </view>
       </view>
     </t-tab-panel>
-    <t-tab-panel label="飞行数据" value="{{1}}">
+    <t-tab-panel label="任务评价" value="{{1}}">
       <view class="container">
         <view class="card">
-          <view class="section-title">飞行数据（多旋翼专属）</view>
-          <view class="form-row">
-            <view class="form-label">
+          <view class="section-title">任务评价</view>
+          <view class="rate-tip">请对本次飞行任务各维度进行评分（1～5分）</view>
+          <!-- 起降 -->
+          <view class="rate-row">
+            <view class="rate-label">
               <text class="required">*</text>
-              最大高度(AGL)
+              起降
             </view>
-            <view class="form-value unit-cell">
-              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxAltitude}}" data-field="maxAltitude" bindinput="onInput" />
-              <text class="unit">米</text>
+            <view class="rate-right">
+              <t-rate value="{{ratingTakeoffLanding}}" count="{{5}}" size="40rpx" showText="{{true}}" data-field="ratingTakeoffLanding" bindchange="onRatingChange" />
             </view>
           </view>
-          <view wx:if="{{errors.maxAltitude}}" class="text-error">{{errors.maxAltitude}}</view>
-          <view class="form-row">
-            <view class="form-label">
+          <view class="rate-tips">起降要垂直均匀，在指定地点范围内</view>
+          <view wx:if="{{errors.ratingTakeoffLanding}}" class="text-error">
+            {{errors.ratingTakeoffLanding}}
+          </view>
+          <!-- 范围漂移 -->
+          <view class="rate-row">
+            <view class="rate-label">
               <text class="required">*</text>
-              最大水平速度
+              范围漂移
             </view>
-            <view class="form-value unit-cell">
-              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxHorizontalSpeed}}" data-field="maxHorizontalSpeed" bindinput="onInput" />
-              <text class="unit">m/s</text>
+            <view class="rate-right">
+              <t-rate value="{{ratingDriftRange}}" count="{{5}}" size="40rpx" showText="{{true}}" data-field="ratingDriftRange" bindchange="onRatingChange" />
             </view>
           </view>
-          <view wx:if="{{errors.maxHorizontalSpeed}}" class="text-error">
-            {{errors.maxHorizontalSpeed}}
+          <view class="rate-tips">范围不能漂移指定航线 0.2 米半径外</view>
+          <view wx:if="{{errors.ratingDriftRange}}" class="text-error">
+            {{errors.ratingDriftRange}}
           </view>
-          <view class="form-row">
-            <view class="form-label">
+          <!-- 高度漂移 -->
+          <view class="rate-row">
+            <view class="rate-label">
               <text class="required">*</text>
-              最大垂直速度
+              高度漂移
             </view>
-            <view class="form-value unit-cell">
-              <input class="input" type="digit" placeholder="保留1位小数" value="{{maxVerticalSpeed}}" data-field="maxVerticalSpeed" bindinput="onInput" />
-              <text class="unit">m/s</text>
-            </view>
-          </view>
-          <view wx:if="{{errors.maxVerticalSpeed}}" class="text-error">
-            {{errors.maxVerticalSpeed}}
-          </view>
-          <view class="form-row">
-            <view class="form-label">
-              <text class="required">*</text>
-              起飞电量(SOC)
-            </view>
-            <view class="form-value unit-cell">
-              <input class="input" type="number" placeholder="整数，无需填%" value="{{takeoffSoc}}" data-field="takeoffSoc" bindinput="onInput" />
-              <text class="unit">%</text>
+            <view class="rate-right">
+              <t-rate value="{{ratingDriftAltitude}}" count="{{5}}" size="40rpx" showText="{{true}}" data-field="ratingDriftAltitude" bindchange="onRatingChange" />
             </view>
           </view>
-          <view wx:if="{{errors.takeoffSoc}}" class="text-error">{{errors.takeoffSoc}}</view>
-          <view class="form-row">
-            <view class="form-label">
-              <text class="required">*</text>
-              降落电量(SOC)
-            </view>
-            <view class="form-value unit-cell">
-              <input class="input" type="number" placeholder="整数，无需填%" value="{{landingSoc}}" data-field="landingSoc" bindinput="onInput" />
-              <text class="unit">%</text>
-            </view>
+          <view class="rate-tips">高度不能漂移超过指定高度 ±0.2 米（GPS、定高模式下完全不能掉高）</view>
+          <view wx:if="{{errors.ratingDriftAltitude}}" class="text-error">
+            {{errors.ratingDriftAltitude}}
           </view>
-          <view wx:if="{{errors.landingSoc}}" class="text-error">{{errors.landingSoc}}</view>
-          <view class="form-row">
-            <view class="form-label">
-              <text class="required">*</text>
-              飞行模式
+          <!-- 航线完整：仅航线类任务（第5个及之后）显示 -->
+          <block wx:if="{{missionTypeIndex !== null && missionTypeIndex >= 4}}">
+            <view class="rate-row">
+              <view class="rate-label">
+                <text class="required">*</text>
+                航线完整
+              </view>
+              <view class="rate-right">
+                <t-rate value="{{ratingRouteIntegrity}}" count="{{5}}" size="40rpx" showText="{{true}}" data-field="ratingRouteIntegrity" bindchange="onRatingChange" />
+              </view>
             </view>
-            <view class="form-value">
-              <picker mode="selector" range="{{flightModes}}" value="{{flightModeIndex}}" bindchange="onFlightModePick">
-                <view class="{{flightMode ? '' : 'placeholder-gray'}}">
-                  {{flightMode || '请选择飞行模式'}} ▼
-                </view>
-              </picker>
+            <view class="rate-tips">是否完全飞完航线</view>
+            <view wx:if="{{errors.ratingRouteIntegrity}}" class="text-error">
+              {{errors.ratingRouteIntegrity}}
             </view>
-          </view>
-          <view wx:if="{{errors.flightMode}}" class="text-error">{{errors.flightMode}}</view>
-          <view class="form-row">
-            <view class="form-label">悬停精度</view>
-            <view class="form-value unit-cell">
-              <input class="input" placeholder="格式：水平/垂直，如 0.5/0.3" value="{{hoverAccuracy}}" data-field="hoverAccuracy" bindinput="onInput" />
-              <text class="unit">米</text>
-            </view>
-          </view>
-          <view class="form-row" style="align-items: flex-start;">
-            <view class="form-label">
-              <text class="required">*</text>
-              天气情况
-            </view>
-            <view class="form-value">
-              <input class="input" placeholder="如：3-4级风 25℃ 能见度良好" value="{{weather}}" data-field="weather" bindinput="onInput" />
-            </view>
-          </view>
-          <view wx:if="{{errors.weather}}" class="text-error">{{errors.weather}}</view>
+          </block>
         </view>
       </view>
     </t-tab-panel>
     <t-tab-panel label="异常与备注" value="{{2}}">
       <view class="container">
         <view class="card">
-          <view class="section-title">异常与备注（安全追溯+教学复盘）</view>
-          <view class="multiline-label">
-            <text class="required">*</text>
-            告警/故障记录
-          </view>
-          <textarea class="textarea" placeholder="无异常填「无」，详细描述异常情况" value="{{warningLog}}" data-field="warningLog" bindinput="onInput" maxlength="500" auto-height />
-          <view wx:if="{{errors.warningLog}}" class="text-error">{{errors.warningLog}}</view>
-          <view class="multiline-label mt20">
-            <text class="required">*</text>
-            应急操作记录
-          </view>
-          <textarea class="textarea" placeholder="无应急操作填「无」，描述操作过程" value="{{emergencyLog}}" data-field="emergencyLog" bindinput="onInput" maxlength="500" auto-height />
-          <view wx:if="{{errors.emergencyLog}}" class="text-error">{{errors.emergencyLog}}</view>
-          <view class="form-row mt20">
-            <view class="form-label">
-              <text class="required">*</text>
-              飞行前检查
-            </view>
-            <view class="form-value">
-              <picker mode="selector" range="{{checkResults}}" value="{{preCheckResultIndex}}" bindchange="onCheckResultPick">
-                <view class="{{preCheckResult === '不合格' ? 'danger' : ''}}">
-                  {{preCheckResult || '合格'}} ▼
-                </view>
-              </picker>
-            </view>
-          </view>
-          <view wx:if="{{errors.preCheckResult}}" class="text-error">
-            {{errors.preCheckResult}}
-          </view>
+          <view class="section-title">异常与备注</view>
           <view class="multiline-label mt20">教师评语/飞行总结</view>
-          <textarea class="textarea" placeholder="实训必填，填写操作评价与建议" value="{{teacherComment}}" data-field="teacherComment" bindinput="onInput" maxlength="500" auto-height />
+          <textarea class="textarea" placeholder="默认无，填写操作评价与建议" value="{{teacherComment}}" data-field="teacherComment" bindinput="onInput" maxlength="500" auto-height />
           <view class="multiline-label mt20">
             <text class="required">*</text>
             记录人电子签名
@@ -309,7 +269,6 @@
   <view class="bottom-spacer" />
   <view class="btn-bar">
     <t-button theme="default" bindtap="onReset">重置</t-button>
-    <t-button theme="light" bindtap="onSaveDraft">保存草稿</t-button>
     <t-button theme="primary" loading="{{submitting}}" bindtap="onSubmit">
       {{editId ? '保存修改' : '提交日志'}}
     </t-button>

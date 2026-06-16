@@ -1,0 +1,558 @@
+/* pages/approval/approval.wxss */
+
+.approval-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============ 顶层类型 Tab ============ */
+.type-tab-bar {
+  display: flex;
+  background-color: #0052d9;
+  padding: 0 24rpx;
+}
+
+.type-tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, .65);
+}
+
+.type-tab--active {
+  color: #fff;
+  border-bottom-color: #fff;
+  font-weight: 600;
+}
+
+/* ============ 用户卡片信息 ============ */
+.user-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.user-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-sub {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.user-card-subtitle {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+/* ============ 筛选 Tab ============ */
+.filter-bar {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1rpx solid #e8e8e8;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 16rpx;
+}
+
+.filter-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  font-size: 26rpx;
+  color: #666;
+  border-bottom: 4rpx solid transparent;
+  flex-shrink: 0;
+}
+
+.filter-tab--active {
+  color: #0052d9;
+  border-bottom-color: #0052d9;
+  font-weight: 500;
+}
+
+/* ============ 列表 ============ */
+.list-scroll {
+  flex: 1;
+  height: calc(100vh - 180rpx);
+}
+
+.list-inner {
+  padding: 20rpx 24rpx 40rpx;
+}
+
+.approval-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .06);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx 16rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.log-code {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: .5rpx;
+}
+
+.status-badge {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid;
+  font-weight: 500;
+}
+
+.status-badge--large {
+  font-size: 26rpx;
+  padding: 8rpx 20rpx;
+}
+
+.card-body {
+  padding: 16rpx 28rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-size: 24rpx;
+  color: #999;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16rpx 24rpx;
+  border-top: 1rpx solid #f5f5f5;
+  gap: 8rpx;
+}
+
+.can-approve-tip {
+  font-size: 24rpx;
+  color: #0052d9;
+  font-weight: 500;
+}
+
+.view-detail-tip {
+  font-size: 24rpx;
+  color: #c0c4cc;
+}
+
+/* ============ 加载 / 空状态 ============ */
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.empty-wrap {
+  padding-top: 80rpx;
+}
+
+.load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 24rpx;
+}
+
+.load-more__text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.no-more {
+  text-align: center;
+  font-size: 24rpx;
+  color: #c0c4cc;
+  padding: 20rpx;
+}
+
+/* ============ 详情视图 ============ */
+.detail-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 20rpx 28rpx;
+  border-bottom: 1rpx solid #e8e8e8;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.back-text {
+  font-size: 28rpx;
+  color: #0052d9;
+}
+
+.detail-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.detail-nav-action {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.detail-nav-text {
+  font-size: 26rpx;
+  color: #0052d9;
+}
+
+.detail-scroll {
+  height: calc(100vh - 200rpx);
+}
+
+.detail-inner {
+  padding: 24rpx 24rpx 60rpx;
+}
+
+/* ============ 状态卡片 ============ */
+.status-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .06);
+}
+
+.status-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
+}
+
+.status-card__code {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 审批进度条 */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.progress-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #d9d9d9;
+}
+
+.progress-step--done .progress-dot {
+  background-color: #0052d9;
+}
+
+.progress-step--reject .progress-dot {
+  background-color: #ff4d4f;
+}
+
+.progress-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.progress-step--done .progress-label {
+  color: #0052d9;
+}
+
+.progress-line {
+  flex: 1;
+  height: 4rpx;
+  background-color: #d9d9d9;
+  margin: 0 12rpx;
+  margin-bottom: 26rpx;
+}
+
+.progress-line--done {
+  background-color: #0052d9;
+}
+
+/* ============ 信息区块 ============ */
+.info-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .06);
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 24rpx 28rpx 16rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+/* 评分组 */
+.rating-group {
+  padding: 16rpx 28rpx 24rpx;
+}
+
+.rating-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.rating-item:last-child {
+  border-bottom: 0;
+}
+
+.rating-label {
+  font-size: 26rpx;
+  color: #555;
+}
+
+/* 评语区 */
+.comment-box {
+  padding: 20rpx 28rpx 28rpx;
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* ============ 审批流水 ============ */
+.timeline {
+  padding: 16rpx 28rpx 24rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 28rpx;
+  position: relative;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-item:not(:last-child):before {
+  content: '';
+  position: absolute;
+  left: 11rpx;
+  top: 24rpx;
+  bottom: -28rpx;
+  width: 2rpx;
+  background-color: #e8e8e8;
+}
+
+.timeline-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background-color: #52c41a;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+}
+
+.timeline-item--reject .timeline-dot {
+  background-color: #ff4d4f;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.timeline-name {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.timeline-action {
+  font-size: 24rpx;
+  color: #52c41a;
+}
+
+.timeline-item--reject .timeline-action {
+  color: #ff4d4f;
+}
+
+.timeline-note {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 6rpx;
+}
+
+.timeline-comment {
+  display: block;
+  font-size: 24rpx;
+  color: #ff4d4f;
+  margin-bottom: 6rpx;
+}
+
+.timeline-time {
+  display: block;
+  font-size: 22rpx;
+  color: #c0c4cc;
+}
+
+/* ============ 操作区 ============ */
+.action-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, .06);
+}
+
+.action-hint {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background-color: #fffbe6;
+  border: 1rpx solid #ffe58f;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.action-hint-text {
+  font-size: 26rpx;
+  color: #d48806;
+  flex: 1;
+}
+
+.action-btns {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+}
+
+/* 驳回按钮样式覆盖 */
+.action-btn--reject {
+  --td-button-default-color: #ff4d4f;
+  --td-button-default-border-color: #ff4d4f;
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+/* 被驳回时操作区 */
+.reject-reason-box {
+  background-color: #fff2f0;
+  border: 1rpx solid #ffccc7;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.reject-reason-title {
+  display: block;
+  font-size: 24rpx;
+  color: #ff4d4f;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.reject-reason-text {
+  display: block;
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* 审批完成提示 */
+.approved-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 0;
+}
+
+.approved-tip-text {
+  font-size: 28rpx;
+  color: #52c41a;
+  font-weight: 500;
+}
+
+/* ============ 弹窗内容 ============ */
+.dialog-content {
+  padding: 8rpx 0;
+}
+
+.native-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  padding: 16rpx;
+  box-sizing: border-box;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+  background-color: #fafafa;
+  line-height: 1.6;
+}

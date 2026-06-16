@@ -18,7 +18,7 @@
       </block>
       <view class="user-sub">
         {{registered ? roleOptions[roleIndex] : '未注册'}}
-        <text wx:if="{{isAdmin}}" class="admin-inline"> · 管理员</text>
+        <text wx:if="{{isAdmin}}" class="admin-inline">· 管理员</text>
       </view>
       <view wx:if="{{openid}}" class="openid-row" bindtap="copyOpenid">
         <text class="openid-label">OpenID：</text>
@@ -27,7 +27,6 @@
       </view>
     </view>
   </view>
-
   <!-- 一键操作 -->
   <view class="quick-actions">
     <view wx:if="{{userInfo.avatarUrl || userInfo.nickName}}" class="qa-btn danger" bindtap="clearUserInfo">
@@ -35,25 +34,50 @@
       <text>清除头像与昵称</text>
     </view>
   </view>
-
   <!-- 身份注册卡片 -->
   <view class="card">
     <view class="section-title">
       身份注册
-      <text wx:if="{{registered}}" class="registered-tag">已注册</text>
+      <view wx:if="{{registered && userApprovalStatus === 'approved'}}" class="registered-tag">
+        已生效
+      </view>
+      <view wx:elif="{{registered && userApprovalStatus === 'pending'}}" class="approval-pending-tag">
+        审批中
+      </view>
+      <view wx:elif="{{registered && userApprovalStatus === 'rejected'}}" class="approval-rejected-tag">
+        已驳回
+      </view>
+      <text wx:elif="{{registered}}" class="registered-tag">已注册</text>
       <text wx:else class="unregistered-tag">未注册</text>
     </view>
-
+    <!-- 审批状态横幅 -->
+    <view wx:if="{{userApprovalStatus === 'pending'}}" class="approval-banner approval-banner--pending">
+      <text class="approval-banner__icon">⏳</text>
+      <text class="approval-banner__text">信息已提交，等待管理员审核，审核通过后生效</text>
+    </view>
+    <view wx:elif="{{userApprovalStatus === 'rejected'}}" class="approval-banner approval-banner--rejected">
+      <text class="approval-banner__icon">✗</text>
+      <view class="approval-banner__body">
+        <text class="approval-banner__text">审批被驳回，请修改后重新提交</text>
+        <text wx:if="{{userApprovalLog.length > 0}}" class="approval-banner__reason">
+          驳回原因：{{userApprovalLog[userApprovalLog.length - 1].comment || '无'}}
+        </text>
+      </view>
+    </view>
     <!-- 提示文案 -->
     <view class="reg-tip">
-      <text wx:if="{{registered && !editing}}">以下为您已登记的身份信息，点击「更新信息」可修改。</text>
-      <text wx:elif="{{registered && editing}}">正在编辑身份信息，修改完成后点击「保存信息」。</text>
-      <text wx:else>请选择您的身份并填写信息，完成注册后系统将自动预填飞行日志。</text>
+      <text wx:if="{{userApprovalStatus === 'pending'}}">以下为您申请中的信息，审核通过前暂不生效。</text>
+      <text wx:elif="{{userApprovalStatus === 'rejected'}}">请修改下方信息后重新提交审批。</text>
+      <text wx:elif="{{registered && !editing}}">以下为您已生效的身份信息，点击「更新信息」可修改（需重新审批）。</text>
+      <text wx:elif="{{registered && editing}}">正在编辑身份信息，修改完成后点击「提交审批」。</text>
+      <text wx:else>请选择您的身份并填写信息，提交后由管理员审批后生效。</text>
     </view>
-
     <!-- 用户身份 -->
     <view class="form-row">
-      <view class="form-label"><text wx:if="{{editing}}" class="required">*</text>用户身份</view>
+      <view class="form-label">
+        <text wx:if="{{editing}}" class="required">*</text>
+        用户身份
+      </view>
       <view class="form-value">
         <!-- 编辑态：picker 可选 -->
         <block wx:if="{{editing}}">
@@ -67,61 +91,108 @@
         </block>
       </view>
     </view>
-
     <!-- 姓名 -->
     <view class="form-row">
-      <view class="form-label"><text wx:if="{{editing}}" class="required">*</text>姓名</view>
+      <view class="form-label">
+        <text wx:if="{{editing}}" class="required">*</text>
+        姓名
+      </view>
       <view class="form-value">
         <input wx:if="{{editing}}" class="input" placeholder="请输入真实姓名" value="{{reg.realName}}" data-field="realName" bindinput="onRegInput" />
-        <view wx:else class="readonly-value {{reg.realName ? '' : 'readonly-empty'}}">{{reg.realName || '未填写'}}</view>
+        <view wx:else class="readonly-value {{reg.realName ? '' : 'readonly-empty'}}">
+          {{reg.realName || '未填写'}}
+        </view>
       </view>
     </view>
-
     <!-- 学号/编号 -->
     <view class="form-row">
-      <view class="form-label"><text wx:if="{{editing}}" class="required">*</text>{{idLabel}}</view>
+      <view class="form-label">
+        <text wx:if="{{editing}}" class="required">*</text>
+        {{idLabel}}
+      </view>
       <view class="form-value">
         <input wx:if="{{editing}}" class="input" placeholder="请输入{{idLabel}}" value="{{reg.studentId}}" data-field="studentId" bindinput="onRegInput" />
-        <view wx:else class="readonly-value {{reg.studentId ? '' : 'readonly-empty'}}">{{reg.studentId || '未填写'}}</view>
+        <view wx:else class="readonly-value {{reg.studentId ? '' : 'readonly-empty'}}">
+          {{reg.studentId || '未填写'}}
+        </view>
       </view>
     </view>
-
     <!-- 联系方式 -->
     <view class="form-row">
       <view class="form-label">联系方式</view>
       <view class="form-value">
         <input wx:if="{{editing}}" class="input" type="number" placeholder="手机号码（选填）" value="{{reg.phone}}" data-field="phone" bindinput="onRegInput" />
-        <view wx:else class="readonly-value {{reg.phone ? '' : 'readonly-empty'}}">{{reg.phone || '未填写'}}</view>
+        <view wx:else class="readonly-value {{reg.phone ? '' : 'readonly-empty'}}">
+          {{reg.phone || '未填写'}}
+        </view>
       </view>
     </view>
-
     <!-- 班级/单位 -->
     <view class="form-row">
-      <view class="form-label"><text wx:if="{{editing}}" class="required">*</text>班级/单位</view>
+      <view class="form-label">
+        <text wx:if="{{editing}}" class="required">*</text>
+        班级/单位
+      </view>
       <view class="form-value">
         <input wx:if="{{editing}}" class="input" placeholder="如：无人机22级1班" value="{{reg.className}}" data-field="className" bindinput="onRegInput" />
-        <view wx:else class="readonly-value {{reg.className ? '' : 'readonly-empty'}}">{{reg.className || '未填写'}}</view>
+        <view wx:else class="readonly-value {{reg.className ? '' : 'readonly-empty'}}">
+          {{reg.className || '未填写'}}
+        </view>
       </view>
     </view>
-
     <!-- 按钮区 -->
-    <!-- 未注册 或 已注册且编辑中：显示保存/完成注册按钮 -->
+    <!-- 未注册 或 编辑中（含被驳回重填）：显示提交审批按钮 -->
     <block wx:if="{{!registered || editing}}">
       <t-button class="save-button" theme="primary" block size="small" loading="{{saving}}" bindtap="saveProfile">
-        {{registered ? '保存信息' : '完成注册'}}
+        提交审批
       </t-button>
     </block>
-    <!-- 已注册且只读：显示更新信息按钮 -->
+    <!-- 已注册且只读：根据审批状态显示不同按钮 -->
     <block wx:else>
-      <t-button class="save-button" theme="light" block size="small" bindtap="startEditing">
+      <!-- 审批中时不允许再次编辑 -->
+      <t-button wx:if="{{userApprovalStatus === 'pending'}}" class="save-button" theme="light" block size="small" disabled>
+        审批中，请等待...
+      </t-button>
+      <!-- 已通过或无状态：允许更新 -->
+      <t-button wx:else class="save-button" theme="light" block size="small" bindtap="startEditing">
         更新信息
       </t-button>
     </block>
   </view>
-
+  <!-- 数据统计卡片 -->
+  <view class="card" wx:if="{{ registered && userApprovalStatus === 'approved'}}">
+    <view class="section-title">数据统计</view>
+    <view wx:if="{{dutyStatsLoading}}" class="stats-loading">加载中...</view>
+    <block wx:else>
+      <!-- 飞行指导时间：仅教师角色可见 -->
+      <view class="stats-row" wx:if="{{role === 'instructor'}}">
+        <view class="stats-label">
+          <text class="stats-icon">🎓</text>
+          飞行指导时间
+        </view>
+        <view class="stats-value">{{teacherDutyText}}</view>
+      </view>
+      <!-- 飞行值勤时间：学员和教师均可见 -->
+      <view class="stats-row">
+        <view class="stats-label">
+          <text class="stats-icon">🛡️</text>
+          飞行值勤时间
+        </view>
+        <view class="stats-value">{{safetyDutyText}}</view>
+      </view>
+    </block>
+  </view>
   <!-- 其他操作 -->
   <view class="card">
     <view class="section-title">其他操作</view>
+    <!-- 审批中心入口：所有人可见 -->
+    <view class="menu-row" bindtap="goApproval">
+      <view class="menu-row__left">
+        <text>✅ 审批中心</text>
+        <t-badge wx:if="{{pendingApprovalCount > 0}}" count="{{pendingApprovalCount}}" max-count="{{99}}" class="approval-badge" />
+      </view>
+      <text class="arrow">›</text>
+    </view>
     <view class="menu-row" bindtap="goReport">
       <text>🚀 填报新日志</text>
       <text class="arrow">›</text>
@@ -130,11 +201,6 @@
       <text>📊 查看数据统计</text>
       <text class="arrow">›</text>
     </view>
-    <view class="menu-row" bindtap="clearDraft">
-      <text>🗑️ 清除本地草稿 {{hasDraft ? '（有草稿）' : '（无）'}}</text>
-      <text class="arrow">›</text>
-    </view>
   </view>
-
   <view class="footer">多旋翼无人机飞行云日志系统 v1.0.0</view>
 </view>

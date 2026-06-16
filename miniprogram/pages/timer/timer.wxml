@@ -40,6 +40,30 @@
       <text class="date-text">飞行日期：{{flightDate}}</text>
     </view>
   </view>
+  <!-- 预填信息区（可选，计时完成后一并带入填报页） -->
+  <view class="prefill-card">
+    <view class="prefill-title">预填信息（可选）</view>
+    <view class="prefill-row">
+      <view class="prefill-label">无人机型号</view>
+      <view class="prefill-value">
+        <picker mode="selector" range="{{droneModels}}" value="{{droneModelIndex}}" bindchange="onDroneModelPick">
+          <view class="{{droneModel ? 'prefill-selected' : 'prefill-placeholder'}}">
+            {{droneModel || '请选择无人机型号'}} ▼
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="prefill-row">
+      <view class="prefill-label">任务类型</view>
+      <view class="prefill-value">
+        <picker mode="selector" range="{{missionTypes}}" value="{{missionTypeIndex}}" bindchange="onMissionTypePick">
+          <view class="{{missionType ? 'prefill-selected' : 'prefill-placeholder'}}">
+            {{missionType || '请选择任务类型'}} ▼
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
   <!-- 操作按钮区 -->
   <view class="action-area">
     <!-- 待机状态：显示开始按钮 -->

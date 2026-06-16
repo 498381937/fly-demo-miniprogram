@@ -14,44 +14,61 @@
     <view class="row"><text class="k">学号/执照</text><text class="v">{{detail.pilotId}}</text></view>
     <view class="row"><text class="k">班级/单位</text><text class="v">{{detail.className}}</text></view>
     <view class="row"><text class="k">指导教师</text><text class="v">{{detail.teacher || '-'}}</text></view>
+    <view class="row"><text class="k">安全员</text><text class="v">{{detail.safetyOfficer || '-'}}</text></view>
     <view class="row"><text class="k">无人机型号</text><text class="v">{{detail.droneModel}}</text></view>
-    <view class="row"><text class="k">机身SN</text><text class="v">{{detail.bodySn}}</text></view>
-    <view class="row"><text class="k">电池SN</text><text class="v">{{detail.batterySn}}</text></view>
     <view class="row"><text class="k">任务类型</text><text class="v">{{detail.missionType}}</text></view>
-    <view class="row"><text class="k">起飞地点</text><text class="v">{{detail.takeoffLocation}}</text></view>
-    <view class="row"><text class="k">降落地点</text><text class="v">{{detail.landingLocation}}</text></view>
+    <view class="row"><text class="k">飞行模式</text><text class="v">{{detail.flightMode}}</text></view>
     <view class="row"><text class="k">空域报备</text><text class="v">{{detail.airspaceCode}}</text></view>
   </view>
 
   <view class="card">
-    <view class="section-title">飞行数据</view>
-    <view class="row"><text class="k">最大高度</text><text class="v">{{detail.maxAltitude}} 米</text></view>
-    <view class="row"><text class="k">最大水平速度</text><text class="v">{{detail.maxHorizontalSpeed}} m/s</text></view>
-    <view class="row"><text class="k">最大垂直速度</text><text class="v">{{detail.maxVerticalSpeed}} m/s</text></view>
-    <view class="row"><text class="k">起飞电量</text><text class="v">{{detail.takeoffSoc}} %</text></view>
-    <view class="row"><text class="k">降落电量</text><text class="v">{{detail.landingSoc}} %</text></view>
-    <view class="row"><text class="k">飞行模式</text><text class="v">{{detail.flightMode}}</text></view>
-    <view class="row"><text class="k">悬停精度</text><text class="v">{{detail.hoverAccuracy || '-'}}</text></view>
-    <view class="row"><text class="k">天气情况</text><text class="v">{{detail.weather}}</text></view>
+    <view class="section-title">任务评价</view>
+    <view class="rate-tip">各维度评分（1～5分）</view>
+    <view class="rate-row">
+      <text class="rate-label">起降</text>
+      <view class="rate-right">
+        <t-rate value="{{detail.ratingTakeoffLanding}}" count="{{5}}" size="36rpx" disabled="{{true}}" />
+        <text class="rate-score">{{detail.ratingTakeoffLanding}} 分</text>
+      </view>
+    </view>
+    <view class="rate-tips">起降要垂直均匀，在指定地点范围内</view>
+    <view class="rate-row">
+      <text class="rate-label">范围漂移</text>
+      <view class="rate-right">
+        <t-rate value="{{detail.ratingDriftRange}}" count="{{5}}" size="36rpx" disabled="{{true}}" />
+        <text class="rate-score">{{detail.ratingDriftRange}} 分</text>
+      </view>
+    </view>
+    <view class="rate-tips">范围不能漂移指定航线 0.2 米半径外</view>
+    <view class="rate-row">
+      <text class="rate-label">高度漂移</text>
+      <view class="rate-right">
+        <t-rate value="{{detail.ratingDriftAltitude}}" count="{{5}}" size="36rpx" disabled="{{true}}" />
+        <text class="rate-score">{{detail.ratingDriftAltitude}} 分</text>
+      </view>
+    </view>
+    <view class="rate-tips">高度不能漂移超过指定高度 ±0.2 米（GPS、定高模式下完全不能掉高）</view>
+    <block wx:if="{{detail.missionType !== '对尾悬停' && detail.missionType !== '对左悬停' && detail.missionType !== '对右悬停' && detail.missionType !== '对头悬停'}}">
+      <view class="rate-row">
+        <text class="rate-label">航线完整</text>
+        <view class="rate-right">
+          <t-rate value="{{detail.ratingRouteIntegrity}}" count="{{5}}" size="36rpx" disabled="{{true}}" />
+          <text class="rate-score">{{detail.ratingRouteIntegrity}} 分</text>
+        </view>
+      </view>
+      <view class="rate-tips">是否完全飞完航线</view>
+    </block>
   </view>
 
   <view class="card">
     <view class="section-title">异常与备注</view>
-    <view class="block">
-      <view class="b-title">告警/故障记录</view>
-      <view class="b-body">{{detail.warningLog}}</view>
-    </view>
-    <view class="block">
-      <view class="b-title">应急操作记录</view>
-      <view class="b-body">{{detail.emergencyLog}}</view>
-    </view>
-    <view class="block">
-      <view class="b-title">飞行前检查</view>
-      <view class="b-body {{detail.preCheckResult === '不合格' ? 'danger' : ''}}">{{detail.preCheckResult}}</view>
-    </view>
     <view class="block" wx:if="{{detail.teacherComment}}">
       <view class="b-title">教师评语/飞行总结</view>
       <view class="b-body">{{detail.teacherComment}}</view>
+    </view>
+    <view class="block" wx:if="{{!detail.teacherComment}}">
+      <view class="b-title">教师评语/飞行总结</view>
+      <view class="b-body b-empty">暂无</view>
     </view>
     <view class="block" wx:if="{{detail.signatureImage}}">
       <view class="b-title">记录人签名</view>
@@ -61,7 +78,7 @@
 
   <view class="bottom-spacer" />
 
-  <view class="btn-bar">
+  <view class="btn-bar" wx:if="{{!readonly}}">
     <t-button theme="danger" variant="outline" bindtap="onDelete">删除</t-button>
     <t-button theme="primary" bindtap="onEdit">编辑</t-button>
   </view>

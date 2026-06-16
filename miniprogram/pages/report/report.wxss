@@ -113,3 +113,56 @@
   color: #0052d9;
   font-size: 26rpx;
 }
+
+/* 任务评价 */
+.rate-tip {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 70rpx 0;
+}
+
+.rate-row:last-of-type {
+  border-bottom: 0;
+}
+
+.rate-label {
+  font-size: 28rpx;
+  color: #333;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.rate-right {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.rate-score {
+  font-size: 26rpx;
+  color: #0052d9;
+  min-width: 72rpx;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rate-empty {
+  color: #bbb;
+}
+
+/* 评分维度 tips */
+.rate-tips {
+  font-size: 26rpx;
+  color: #aaa;
+  padding: 6rpx 0 4rpx;
+  line-height: 1.6;
+}

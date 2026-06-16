@@ -13,7 +13,7 @@ var formatDuration = function (sec) {
 
 var hours = function (sec) {
   sec = sec || 0;
-  return (sec / 3600).toFixed(1);
+  return (sec / 3600).toFixed(2);
 };
 
 module.exports = {

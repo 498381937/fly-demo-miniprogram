@@ -10,15 +10,18 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
-    // 管理员相关
     isAdmin: false,
+    isInstructor: false,
+    canViewAll: false,
     scope: 'mine', // 'mine' | 'all'
   },
 
   onShow() {
-    this.checkAdminAndRefresh();
+    this.refresh();
   },
-
+  onLoad() {
+    this.checkRole();
+  },
   onPullDownRefresh() {
     this.refresh().then(() => wx.stopPullDownRefresh());
   },
@@ -29,19 +32,22 @@ Page({
     }
   },
 
-  // 查询当前用户是否管理员；然后刷新列表
-  checkAdminAndRefresh() {
+  // 查询当前用户角色信息
+  checkRole() {
     wx.cloud
       .callFunction({ name: 'flylog', data: { action: 'who_am_i' } })
       .then((res) => {
-        const isAdmin = !!(
-          res.result &&
-          res.result.success &&
-          res.result.data.isAdmin
-        );
-        this.setData({ isAdmin });
-      })
-      .finally(() => this.refresh());
+        if (res.result && res.result.success) {
+          const d = res.result.data;
+          const isAdmin = !!d.isAdmin;
+          const isInstructor = !isAdmin && d.role === 'instructor';
+          this.setData({
+            isAdmin,
+            isInstructor,
+            canViewAll: isAdmin || isInstructor,
+          });
+        }
+      });
   },
 
   refresh() {
@@ -78,6 +84,8 @@ Page({
             total: d.total,
             hasMore: d.hasMore,
             isAdmin: !!d.isAdmin,
+            isInstructor: !!d.isInstructor,
+            canViewAll: !!d.canViewAll,
             scope: d.scope || 'mine',
           });
         }
@@ -118,7 +126,6 @@ Page({
 
   goEdit(e) {
     const { id } = e.currentTarget.dataset;
-    // 填报页是 tabBar 页，navigateTo 不支持，使用 reLaunch 携带参数
     wx.reLaunch({ url: `/pages/report/report?id=${id}` });
   },
 

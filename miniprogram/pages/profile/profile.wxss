@@ -228,6 +228,16 @@
   font-size: 28rpx;
 }
 
+.menu-row__left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.approval-badge {
+  display: inline-flex;
+}
+
 .menu-row:last-child {
   border-bottom: 0;
 }
@@ -246,6 +256,81 @@
 
 .save-button {
   margin-top: 24rpx;
+}
+
+/* ============ 注册审批状态标签 ============ */
+.approval-pending-tag {
+  font-size: 20rpx;
+  color: #fa8c16;
+  background: #fff7e6;
+  border: 1rpx solid #ffd591;
+  border-radius: 20rpx;
+  padding: 4rpx 14rpx;
+  margin-left: 12rpx;
+}
+
+.approval-rejected-tag {
+  font-size: 20rpx;
+  color: #ff4d4f;
+  background: #fff2f0;
+  border: 1rpx solid #ffccc7;
+  border-radius: 20rpx;
+  padding: 4rpx 14rpx;
+  margin-left: 12rpx;
+}
+
+/* ============ 审批状态横幅 ============ */
+.approval-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin: 0 0 16rpx;
+}
+
+.approval-banner--pending {
+  background: #fffbe6;
+  border: 1rpx solid #ffe58f;
+}
+
+.approval-banner--rejected {
+  background: #fff2f0;
+  border: 1rpx solid #ffccc7;
+}
+
+.approval-banner__icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.approval-banner__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.approval-banner__text {
+  font-size: 26rpx;
+  color: #d48806;
+  line-height: 1.5;
+}
+
+.approval-banner--rejected .approval-banner__text {
+  color: #cf1322;
+}
+
+.approval-banner__reason {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  line-height: 1.5;
+}
+
+/* 审批中入口高亮 */
+.menu-row--approval {
+  color: #0052d9;
+  font-weight: 500;
 }
 
 /* 已注册 / 未注册 标签 */
@@ -303,4 +388,42 @@
 
 .readonly-empty {
   color: #bbb;
+}
+
+/* ============ 数据统计 ============ */
+.stats-loading {
+  font-size: 26rpx;
+  color: #bbb;
+  padding: 16rpx 0;
+  text-align: center;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.stats-row:last-child {
+  border-bottom: 0;
+}
+
+.stats-label {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.stats-icon {
+  font-size: 30rpx;
+}
+
+.stats-value {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0052d9;
 }

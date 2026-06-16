@@ -1,0 +1,461 @@
+<!-- pages/approval/approval.wxml -->
+<wxs module="fmt">
+// 时间字符串格式为北京时间 "2026-06-15 19:45:00"，截取前 16 位展示 "2026-06-15 19:45"
+var formatTime = function(timeStr) {
+  if (!timeStr) return '';
+  return timeStr.substring(0, 16);
+};
+module.exports = { formatTime: formatTime };
+</wxs>
+<view class="approval-page">
+
+  <!-- ============ 顶层类型 Tab（日志审批 / 用户审批）============ -->
+  <view class="type-tab-bar" wx:if="{{viewMode === 'list'}}">
+    <view
+      class="type-tab {{typeTabIndex === 0 ? 'type-tab--active' : ''}}"
+      data-index="0"
+      bindtap="onTypeTabChange"
+    >日志审批</view>
+    <view
+      wx:if="{{showUserTab}}"
+      class="type-tab {{typeTabIndex === 1 ? 'type-tab--active' : ''}}"
+      data-index="1"
+      bindtap="onTypeTabChange"
+    >用户注册审批</view>
+  </view>
+
+  <!-- ============ 日志审批：列表视图 ============ -->
+  <block wx:if="{{viewMode === 'list' && typeTabIndex === 0}}">
+
+    <!-- 日志筛选 Tab -->
+    <view class="filter-bar" wx:if="{{logFilterTabs.length > 1}}">
+      <view
+        wx:for="{{logFilterTabs}}"
+        wx:key="status"
+        class="filter-tab {{logActiveFilterIndex === index ? 'filter-tab--active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onLogFilterTabChange"
+      >{{item.label}}</view>
+    </view>
+
+    <view class="empty-wrap" wx:if="{{!logLoading && logList.length === 0}}">
+      <t-empty icon="info-circle" description="暂无待处理记录" />
+    </view>
+
+    <scroll-view
+      scroll-y
+      class="list-scroll"
+      wx:if="{{logList.length > 0}}"
+      bindscrolltolower="onLogLoadMore"
+      lower-threshold="80"
+      refresher-enabled
+      bindrefresherrefresh="onPullDownRefresh"
+    >
+      <view class="list-inner">
+        <view
+          wx:for="{{logList}}"
+          wx:key="_id"
+          class="approval-card"
+          data-id="{{item._id}}"
+          bindtap="onLogItemTap"
+        >
+          <view class="card-header">
+            <text class="log-code">{{item.logCode}}</text>
+            <view class="status-badge" style="background-color: {{item._statusConfig.color}}20; color: {{item._statusConfig.color}}; border-color: {{item._statusConfig.color}}40;">
+              {{item._statusConfig.label}}
+            </view>
+          </view>
+          <view class="card-body">
+            <view class="info-row"><text class="info-label">飞行日期</text><text class="info-value">{{item.flightDate}}</text></view>
+            <view class="info-row"><text class="info-label">驾驶员</text><text class="info-value">{{item.pilotName}}（{{item.className}}）</text></view>
+            <view class="info-row"><text class="info-label">机型/任务</text><text class="info-value">{{item.droneModel}} · {{item.missionType}}</text></view>
+            <view class="info-row"><text class="info-label">安全员</text><text class="info-value">{{item.safetyOfficer || '-'}}</text></view>
+            <view class="info-row"><text class="info-label">指导教师</text><text class="info-value">{{item.teacher || '-'}}</text></view>
+          </view>
+          <view class="card-footer">
+            <view class="{{item._canApprove ? 'can-approve-tip' : 'view-detail-tip'}}">
+              {{item._canApprove ? '✦ 待您审批' : '查看详情'}}
+            </view>
+            <t-icon name="chevron-right" size="32rpx" color="{{item._canApprove ? '#0052d9' : '#c0c4cc'}}" />
+          </view>
+        </view>
+
+        <view class="load-more" wx:if="{{logLoading}}">
+          <t-loading theme="circular" size="40rpx" />
+          <text class="load-more__text">加载中...</text>
+        </view>
+        <view class="no-more" wx:if="{{!logHasMore && logList.length > 0 && !logLoading}}">共 {{logTotal}} 条记录</view>
+      </view>
+    </scroll-view>
+
+    <view class="loading-wrap" wx:if="{{logLoading && logList.length === 0}}">
+      <t-loading theme="circular" size="60rpx" />
+    </view>
+  </block>
+
+  <!-- ============ 用户注册审批：列表视图 ============ -->
+  <block wx:elif="{{viewMode === 'list' && typeTabIndex === 1}}">
+
+    <!-- 用户筛选 Tab -->
+    <view class="filter-bar">
+      <view
+        wx:for="{{userFilterTabs}}"
+        wx:key="status"
+        class="filter-tab {{userActiveFilterIndex === index ? 'filter-tab--active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onUserFilterTabChange"
+      >{{item.label}}</view>
+    </view>
+
+    <view class="empty-wrap" wx:if="{{!userLoading && userList.length === 0}}">
+      <t-empty icon="info-circle" description="暂无待处理的注册申请" />
+    </view>
+
+    <scroll-view
+      scroll-y
+      class="list-scroll"
+      wx:if="{{userList.length > 0}}"
+      bindscrolltolower="onUserLoadMore"
+      lower-threshold="80"
+    >
+      <view class="list-inner">
+        <view
+          wx:for="{{userList}}"
+          wx:key="openid"
+          class="approval-card"
+          data-openid="{{item.openid}}"
+          bindtap="onUserItemTap"
+        >
+          <view class="card-header">
+            <view class="user-card-title">
+              <text class="user-name">{{item.pendingData.realName || item.realName || '未填写姓名'}}</text>
+              <text class="user-sub">{{item.nickName}}</text>
+            </view>
+            <view class="status-badge" style="background-color: {{item._statusConfig.color}}20; color: {{item._statusConfig.color}}; border-color: {{item._statusConfig.color}}40;">
+              {{item._statusConfig.label}}
+            </view>
+          </view>
+          <view class="card-body">
+            <view class="info-row"><text class="info-label">角色</text><text class="info-value">{{item.role === 'instructor' ? '指导教师' : '学员'}}</text></view>
+            <view class="info-row"><text class="info-label">学号/编号</text><text class="info-value">{{item.pendingData.studentId || item.studentId || '-'}}</text></view>
+            <view class="info-row"><text class="info-label">班级/单位</text><text class="info-value">{{item.pendingData.className || item.className || '-'}}</text></view>
+            <view class="info-row"><text class="info-label">联系方式</text><text class="info-value">{{item.pendingData.phone || item.phone || '-'}}</text></view>
+          </view>
+          <view class="card-footer">
+            <text class="can-approve-tip" wx:if="{{item.userApprovalStatus === 'pending'}}">✦ 待审批</text>
+            <text class="view-detail-tip" wx:else>查看详情</text>
+            <t-icon name="chevron-right" size="32rpx" color="{{item.userApprovalStatus === 'pending' ? '#0052d9' : '#c0c4cc'}}" />
+          </view>
+        </view>
+
+        <view class="load-more" wx:if="{{userLoading}}">
+          <t-loading theme="circular" size="40rpx" />
+          <text class="load-more__text">加载中...</text>
+        </view>
+        <view class="no-more" wx:if="{{!userHasMore && userList.length > 0 && !userLoading}}">共 {{userTotal}} 条记录</view>
+      </view>
+    </scroll-view>
+
+    <view class="loading-wrap" wx:if="{{userLoading && userList.length === 0}}">
+      <t-loading theme="circular" size="60rpx" />
+    </view>
+  </block>
+
+  <!-- ============ 详情视图：日志审批 ============ -->
+  <block wx:elif="{{viewMode === 'detail' && currentType === 'log'}}">
+    <view class="detail-navbar">
+      <view class="back-btn" bindtap="backToList">
+        <t-icon name="chevron-left" size="40rpx" color="#0052d9" />
+        <text class="back-text">返回列表</text>
+      </view>
+      <text class="detail-title">日志审批详情</text>
+      <view class="detail-nav-action" bindtap="goToLogDetail">
+        <text class="detail-nav-text">完整日志</text>
+        <t-icon name="jump" size="32rpx" color="#0052d9" />
+      </view>
+    </view>
+
+    <scroll-view scroll-y class="detail-scroll" wx:if="{{currentItem}}">
+      <view class="detail-inner">
+
+        <!-- 状态卡片 -->
+        <view class="status-card">
+          <view class="status-card__header">
+            <text class="status-card__code">{{currentItem.logCode}}</text>
+            <view class="status-badge status-badge--large" style="background-color: {{currentItem._statusConfig.color}}20; color: {{currentItem._statusConfig.color}}; border-color: {{currentItem._statusConfig.color}}40;">
+              {{currentItem._statusConfig.label}}
+            </view>
+          </view>
+          <!-- 审批进度条 -->
+          <view class="progress-bar">
+            <view class="progress-step progress-step--done">
+              <view class="progress-dot"></view>
+              <text class="progress-label">提交</text>
+            </view>
+            <view class="progress-line {{currentItem.approvalStatus === 'pending_instructor' || currentItem.approvalStatus === 'approved' ? 'progress-line--done' : ''}}"></view>
+            <view class="progress-step {{currentItem.approvalStatus === 'pending_instructor' || currentItem.approvalStatus === 'approved' ? 'progress-step--done' : (currentItem.approvalStatus === 'rejected' ? 'progress-step--reject' : '')}}">
+              <view class="progress-dot"></view>
+              <text class="progress-label">安全员</text>
+            </view>
+            <view class="progress-line {{currentItem.approvalStatus === 'approved' ? 'progress-line--done' : ''}}"></view>
+            <view class="progress-step {{currentItem.approvalStatus === 'approved' ? 'progress-step--done' : ''}}">
+              <view class="progress-dot"></view>
+              <text class="progress-label">教师</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 基础信息 -->
+        <view class="info-section">
+          <view class="section-title">飞行信息</view>
+          <t-cell-group bordered>
+            <t-cell title="飞行日期" note="{{currentItem.flightDate}}" />
+            <t-cell title="起飞 / 降落" note="{{currentItem.takeoffTime}} ~ {{currentItem.landingTime}}" />
+            <t-cell title="飞行时长" note="{{currentItem.totalDuration}}" />
+            <t-cell title="驾驶员" note="{{currentItem.pilotName}}" />
+            <t-cell title="学号" note="{{currentItem.pilotId}}" />
+            <t-cell title="班级/单位" note="{{currentItem.className}}" />
+            <t-cell title="无人机型号" note="{{currentItem.droneModel}}" />
+            <t-cell title="飞行任务" note="{{currentItem.missionType}}" />
+            <t-cell title="飞行模式" note="{{currentItem.flightMode}}" />
+            <t-cell title="空域编号" note="{{currentItem.airspaceCode}}" />
+            <t-cell title="安全员" note="{{currentItem.safetyOfficer}}" />
+            <t-cell title="指导教师" note="{{currentItem.teacher}}" />
+          </t-cell-group>
+        </view>
+
+        <!-- 评分 -->
+        <view class="info-section">
+          <view class="section-title">任务评价</view>
+          <view class="rating-group">
+            <view class="rating-item">
+              <text class="rating-label">起降</text>
+              <t-rate value="{{currentItem.ratingTakeoffLanding}}" disabled size="36rpx" />
+            </view>
+            <view class="rating-item">
+              <text class="rating-label">范围漂移</text>
+              <t-rate value="{{currentItem.ratingDriftRange}}" disabled size="36rpx" />
+            </view>
+            <view class="rating-item">
+              <text class="rating-label">高度漂移</text>
+              <t-rate value="{{currentItem.ratingDriftAltitude}}" disabled size="36rpx" />
+            </view>
+            <block wx:if="{{currentItem.missionType !== '对尾悬停' && currentItem.missionType !== '对左悬停' && currentItem.missionType !== '对右悬停' && currentItem.missionType !== '对头悬停'}}">
+              <view class="rating-item">
+                <text class="rating-label">航线完整</text>
+                <t-rate value="{{currentItem.ratingRouteIntegrity}}" disabled size="36rpx" />
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 审批流水 -->
+        <view class="info-section" wx:if="{{currentItem.approvalLog && currentItem.approvalLog.length > 0}}">
+          <view class="section-title">审批记录</view>
+          <view class="timeline">
+            <view wx:for="{{currentItem.approvalLog}}" wx:key="time"
+              class="timeline-item {{item.action === 'approve' ? 'timeline-item--approve' : 'timeline-item--reject'}}">
+              <view class="timeline-dot"></view>
+              <view class="timeline-content">
+                <view class="timeline-header">
+                  <text class="timeline-name">{{item.operatorName}}</text>
+                  <text class="timeline-action">{{item.action === 'approve' ? '✓ 通过' : '✗ 驳回'}}</text>
+                </view>
+                <text class="timeline-note" wx:if="{{item.note}}">{{item.note}}</text>
+                <text class="timeline-comment" wx:if="{{item.comment}}">备注：{{item.comment}}</text>
+                <text class="timeline-time">{{fmt.formatTime(item.time)}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 学员被驳回时操作区 -->
+        <view class="action-section" wx:if="{{userRole === 'student' && currentItem.approvalStatus === 'rejected'}}">
+          <view class="reject-reason-box">
+            <text class="reject-reason-title">驳回原因</text>
+            <text class="reject-reason-text">
+              {{currentItem.approvalLog && currentItem.approvalLog.length > 0
+                ? currentItem.approvalLog[currentItem.approvalLog.length - 1].comment
+                : '无'}}
+            </text>
+          </view>
+          <t-button theme="primary" block bindtap="goToEdit">修改并重新提交</t-button>
+        </view>
+
+        <!-- 审批操作区 -->
+        <view class="action-section" wx:if="{{currentItem._canApprove}}">
+          <view class="action-hint">
+            <t-icon name="info-circle" size="32rpx" color="#fa8c16" />
+            <view class="action-hint-text">
+              {{currentItem.approvalStatus === 'pending_safety' ? '请作为安全员审阅该飞行日志' : '请作为指导教师审阅该飞行日志'}}
+            </view>
+          </view>
+          <view class="action-btns">
+            <t-button theme="light" class="action-btn action-btn--reject" bindtap="showRejectConfirm">驳回</t-button>
+            <t-button theme="primary" class="action-btn" bindtap="showApproveConfirm">审批通过</t-button>
+          </view>
+        </view>
+
+        <!-- 已通过提示 -->
+        <view class="action-section" wx:if="{{currentItem.approvalStatus === 'approved'}}">
+          <view class="approved-tip">
+            <t-icon name="check-circle" size="48rpx" color="#52c41a" />
+            <text class="approved-tip-text">该日志已完成全部审批流程</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="loading-wrap" wx:if="{{detailLoading}}"><t-loading theme="circular" size="60rpx" /></view>
+  </block>
+
+  <!-- ============ 详情视图：用户注册审批 ============ -->
+  <block wx:elif="{{viewMode === 'detail' && currentType === 'user'}}">
+    <view class="detail-navbar">
+      <view class="back-btn" bindtap="backToList">
+        <t-icon name="chevron-left" size="40rpx" color="#0052d9" />
+        <text class="back-text">返回列表</text>
+      </view>
+      <text class="detail-title">注册审批详情</text>
+      <view style="width: 120rpx;"></view>
+    </view>
+
+    <scroll-view scroll-y class="detail-scroll" wx:if="{{currentItem}}">
+      <view class="detail-inner">
+
+        <!-- 用户状态卡片 -->
+        <view class="status-card">
+          <view class="status-card__header">
+            <view>
+              <text class="status-card__code">{{currentItem.pendingData.realName || currentItem.realName || '未填写'}}</text>
+              <text class="user-card-subtitle">{{currentItem.nickName}}</text>
+            </view>
+            <view class="status-badge status-badge--large" style="background-color: {{currentItem._statusConfig.color}}20; color: {{currentItem._statusConfig.color}}; border-color: {{currentItem._statusConfig.color}}40;">
+              {{currentItem._statusConfig.label}}
+            </view>
+          </view>
+        </view>
+
+        <!-- 申请信息（pendingData）-->
+        <view class="info-section">
+          <view class="section-title">申请信息（待生效）</view>
+          <t-cell-group bordered>
+            <t-cell title="姓名" note="{{currentItem.pendingData.realName || '未填写'}}" />
+            <t-cell title="学号/编号" note="{{currentItem.pendingData.studentId || '未填写'}}" />
+            <t-cell title="班级/单位" note="{{currentItem.pendingData.className || '未填写'}}" />
+            <t-cell title="联系方式" note="{{currentItem.pendingData.phone || '未填写'}}" />
+          </t-cell-group>
+        </view>
+
+        <!-- 当前已生效信息（仅已有数据时展示） -->
+        <view class="info-section" wx:if="{{currentItem.realName}}">
+          <view class="section-title">当前已生效信息</view>
+          <t-cell-group bordered>
+            <t-cell title="角色" note="{{currentItem.role === 'instructor' ? '指导教师' : '学员'}}" />
+            <t-cell title="姓名" note="{{currentItem.realName}}" />
+            <t-cell title="学号/编号" note="{{currentItem.studentId || '-'}}" />
+            <t-cell title="班级/单位" note="{{currentItem.className || '-'}}" />
+          </t-cell-group>
+        </view>
+
+        <!-- 审批流水 -->
+        <view class="info-section" wx:if="{{currentItem.userApprovalLog && currentItem.userApprovalLog.length > 0}}">
+          <view class="section-title">审批记录</view>
+          <view class="timeline">
+            <view wx:for="{{currentItem.userApprovalLog}}" wx:key="time"
+              class="timeline-item {{item.action === 'approve' ? 'timeline-item--approve' : (item.action === 'reject' ? 'timeline-item--reject' : 'timeline-item--approve')}}">
+              <view class="timeline-dot"></view>
+              <view class="timeline-content">
+                <view class="timeline-header">
+                  <text class="timeline-name">{{item.operatorName || '用户'}}</text>
+                  <view class="timeline-action">
+                    {{item.action === 'approve' ? '✓ 通过' : item.action === 'reject' ? '✗ 驳回' : '📋 提交'}}
+                  </view>
+                </view>
+                <text class="timeline-note" wx:if="{{item.note}}">{{item.note}}</text>
+                <text class="timeline-comment" wx:if="{{item.comment}}">驳回原因：{{item.comment}}</text>
+                <text class="timeline-time">{{fmt.formatTime(item.time)}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 审批操作区 -->
+        <view class="action-section" wx:if="{{currentItem.userApprovalStatus === 'pending'}}">
+          <view class="action-hint">
+            <t-icon name="info-circle" size="32rpx" color="#fa8c16" />
+            <text class="action-hint-text">请审核该用户的注册申请，通过后信息正式生效</text>
+          </view>
+          <view class="action-btns">
+            <t-button theme="light" class="action-btn action-btn--reject" bindtap="showRejectConfirm">驳回</t-button>
+            <t-button theme="primary" class="action-btn" bindtap="showApproveConfirm">审批通过</t-button>
+          </view>
+        </view>
+
+        <!-- 已通过 -->
+        <view class="action-section" wx:if="{{currentItem.userApprovalStatus === 'approved'}}">
+          <view class="approved-tip">
+            <t-icon name="check-circle" size="48rpx" color="#52c41a" />
+            <text class="approved-tip-text">该用户注册信息已审批通过</text>
+          </view>
+        </view>
+
+        <!-- 已驳回 -->
+        <view class="action-section" wx:if="{{currentItem.userApprovalStatus === 'rejected'}}">
+          <view class="reject-reason-box">
+            <text class="reject-reason-title">驳回原因</text>
+            <text class="reject-reason-text">
+              {{currentItem.userApprovalLog && currentItem.userApprovalLog.length > 0
+                ? currentItem.userApprovalLog[currentItem.userApprovalLog.length - 1].comment
+                : '无'}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+
+</view>
+
+<!-- 审批通过确认弹窗 -->
+<t-dialog
+  visible="{{showApproveDialog}}"
+  title="确认审批通过"
+  confirm-btn="{{approveConfirmBtn}}"
+  cancel-btn="取消"
+  bindconfirm="doApprove"
+  bindcancel="closeApproveDialog"
+  bindclose="closeApproveDialog"
+>
+  <view slot="content" class="dialog-content">
+    <textarea
+      class="native-textarea"
+      placeholder="可填写审批备注（选填）"
+      value="{{approveComment}}"
+      bindinput="onApproveCommentInput"
+      maxlength="200"
+      auto-height
+    />
+  </view>
+</t-dialog>
+
+<!-- 驳回确认弹窗 -->
+<t-dialog
+  visible="{{showRejectDialog}}"
+  title="驳回申请"
+  confirm-btn="{{rejectConfirmBtn}}"
+  cancel-btn="取消"
+  bindconfirm="doReject"
+  bindcancel="closeRejectDialog"
+  bindclose="closeRejectDialog"
+>
+  <view slot="content" class="dialog-content">
+    <textarea
+      class="native-textarea"
+      placeholder="请填写驳回原因（必填）"
+      value="{{rejectComment}}"
+      bindinput="onRejectCommentInput"
+      maxlength="200"
+      auto-height
+    />
+  </view>
+</t-dialog>

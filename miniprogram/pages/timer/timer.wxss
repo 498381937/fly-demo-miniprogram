@@ -274,3 +274,53 @@
   color: #0052d9;
   opacity: .7;
 }
+
+/* 预填信息卡片 */
+.prefill-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 82, 217, .07);
+  box-sizing: border-box;
+  margin-top: 32rpx;
+}
+
+.prefill-title {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+}
+
+.prefill-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.prefill-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.prefill-label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.prefill-value {
+  flex: 1;
+}
+
+.prefill-selected {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.prefill-placeholder {
+  font-size: 28rpx;
+  color: #bbb;
+}

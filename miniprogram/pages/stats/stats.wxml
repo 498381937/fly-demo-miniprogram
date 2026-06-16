@@ -1,21 +1,14 @@
 <view class="page">
   <wxs src="../../utils/tools.wxs" module="tools" />
-
-  <!-- 管理员切换：仅管理员可见 -->
-  <view class="scope-bar" wx:if="{{isAdmin}}">
-    <view
-      class="scope-item {{scope === 'mine' ? 'active' : ''}}"
-      data-scope="mine"
-      bindtap="onScopeChange"
-    >仅我的</view>
-    <view
-      class="scope-item {{scope === 'all' ? 'active' : ''}}"
-      data-scope="all"
-      bindtap="onScopeChange"
-    >全部用户</view>
-    <view class="scope-badge">👑 管理员</view>
+  <!-- 范围切换：管理员和教师可见 -->
+  <view class="scope-bar" wx:if="{{canViewAll}}">
+    <view class="scope-item {{scope === 'mine' ? 'active' : ''}}" data-scope="mine" bindtap="onScopeChange">
+      仅我的
+    </view>
+    <view class="scope-item {{scope === 'all' ? 'active' : ''}}" data-scope="all" bindtap="onScopeChange">
+      全部用户
+    </view>
   </view>
-
   <view class="summary" wx:if="{{stats}}">
     <view class="sm-card">
       <view class="sm-num">{{stats.totalFlights}}</view>
@@ -26,63 +19,73 @@
       <view class="sm-label">累计时长(h)</view>
     </view>
   </view>
-
   <view class="card" wx:if="{{stats && stats.daily}}">
     <view class="section-title">近 5 天飞行次数</view>
     <view class="bar-chart">
-      <view
-        wx:for="{{stats.daily}}"
-        wx:key="date"
-        class="bar-col"
-      >
+      <view wx:for="{{stats.daily}}" wx:key="date" class="bar-col">
         <view class="bar-value">{{item.count}}</view>
-        <view
-          class="bar"
-          style="height:{{item.count / maxDaily * 200 + 2}}rpx;"
-        />
+        <view class="bar" style="height:{{item.count / maxDaily * 200 + 2}}rpx;" />
         <view class="bar-label">{{item.date}}</view>
       </view>
     </view>
   </view>
-
   <view class="card" wx:if="{{stats && stats.modelDistribution.length > 0}}">
     <view class="section-title">按机型分布</view>
-    <view
-      wx:for="{{stats.modelDistribution}}"
-      wx:key="_id"
-      class="dist-row"
-    >
+    <view wx:for="{{stats.modelDistribution}}" wx:key="_id" class="dist-row">
       <view class="dist-name">{{item._id || '未填写'}}</view>
       <view class="dist-bar-wrap">
-        <view
-          class="dist-bar"
-          style="width:{{item.count / stats.totalFlights * 100}}%;"
-        />
+        <view class="dist-bar" style="width:{{item.count / stats.totalFlights * 100}}%;" />
       </view>
       <view class="dist-count">{{item.count}} 次 / {{tools.hours(item.duration)}}h</view>
     </view>
   </view>
-
-  <view class="card" wx:if="{{stats && stats.missionDistribution.length > 0}}">
+  <view class="card" wx:if="{{missionList.length > 0}}">
     <view class="section-title">按任务类型分布</view>
-    <view
-      wx:for="{{stats.missionDistribution}}"
-      wx:key="_id"
-      class="dist-row"
-    >
-      <view class="dist-name">{{item._id || '未填写'}}</view>
-      <view class="dist-bar-wrap">
-        <view
-          class="dist-bar mission"
-          style="width:{{item.count / stats.totalFlights * 100}}%;"
-        />
+    <view wx:for="{{missionList}}" wx:key="_id" class="mission-block">
+      <!-- 标题行：任务名 + 时长 -->
+      <view class="mission-header">
+        <view class="mission-name">{{item._id}}</view>
+        <view class="mission-meta">
+          <text class="mission-count">{{item.count}} 次</text>
+          <text class="mission-duration">{{item.durationText}}</text>
+        </view>
       </view>
-      <view class="dist-count">{{item.count}} 次</view>
+      <!-- 时长进度条（以最长任务类型为基准） -->
+      <view class="dist-bar-wrap mission-bar-wrap">
+        <view class="dist-bar mission" style="width:{{item.duration / stats.totalDurationSeconds * 100}}%;" />
+      </view>
+      <!-- 四芒星雷达图 -->
+      <view class="radar-wrap">
+        <canvas type="2d" id="radar-{{index}}" class="radar-canvas" />
+      </view>
+      <!-- 评分说明行 -->
+      <view class="radar-legend">
+        <view class="legend-item">
+          <view class="legend-dot" />
+          <view class="legend-label">
+            起降 {{item.scores.takeoffLanding > 0 ? item.scores.takeoffLanding : '-'}}
+          </view>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot" />
+          <view class="legend-label">
+            范围漂移 {{item.scores.driftRange > 0 ? item.scores.driftRange : '-'}}
+          </view>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot" />
+          <view class="legend-label">
+            高度漂移 {{item.scores.driftAltitude > 0 ? item.scores.driftAltitude : '-'}}
+          </view>
+        </view>
+        <view class="legend-item">
+          <view class="legend-dot" />
+          <view class="legend-label">
+            航线完整 {{item.scores.routeIntegrity > 0 ? item.scores.routeIntegrity : '-'}}
+          </view>
+        </view>
+      </view>
     </view>
   </view>
-
-  <t-empty
-    wx:if="{{stats && stats.totalFlights === 0 && !loading}}"
-    description="暂无统计数据"
-  />
+  <t-empty wx:if="{{stats && stats.totalFlights === 0 && !loading}}" description="暂无统计数据" />
 </view>

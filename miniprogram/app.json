@@ -7,7 +7,8 @@
     "pages/detail/detail",
     "pages/stats/stats",
     "pages/profile/profile",
-    "pages/signature/signature"
+    "pages/signature/signature",
+    "pages/approval/approval"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -77,7 +78,9 @@
     "t-divider": "tdesign-miniprogram/divider/divider",
     "t-grid": "tdesign-miniprogram/grid/grid",
     "t-grid-item": "tdesign-miniprogram/grid-item/grid-item",
-    "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh"
+    "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh",
+    "t-rate": "tdesign-miniprogram/rate/rate",
+    "t-badge": "tdesign-miniprogram/badge/badge"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

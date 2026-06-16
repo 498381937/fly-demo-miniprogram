@@ -1,5 +1,6 @@
 // pages/timer/timer.js
 const util = require('../../utils/util.js');
+const app = getApp();
 
 Page({
   data: {
@@ -14,6 +15,16 @@ Page({
     // 起飞/降落时间 HH:MM:SS
     takeoffTime: '',
     landingTime: '',
+
+    // 预填字段
+    droneModel: '',
+    droneModelIndex: null,
+    missionType: '',
+    missionTypeIndex: null,
+
+    // picker 选项源
+    droneModels: [],
+    missionTypes: [],
   },
 
   // 计时器句柄
@@ -23,7 +34,11 @@ Page({
 
   onLoad() {
     const today = new Date();
-    this.setData({ flightDate: util.formatDate(today) });
+    this.setData({
+      flightDate: util.formatDate(today),
+      droneModels: app.globalData.droneModels,
+      missionTypes: app.globalData.missionTypes,
+    });
   },
 
   onUnload() {
@@ -80,14 +95,40 @@ Page({
     });
   },
 
-  // 进入填报页面（携带计时数据）
+  // 无人机型号 picker
+  onDroneModelPick(e) {
+    const idx = Number(e.detail.value);
+    this.setData({
+      droneModel: this.data.droneModels[idx],
+      droneModelIndex: idx,
+    });
+  },
+
+  // 任务类型 picker
+  onMissionTypePick(e) {
+    const idx = Number(e.detail.value);
+    this.setData({
+      missionType: this.data.missionTypes[idx],
+      missionTypeIndex: idx,
+    });
+  },
+
+  // 进入填报页面（携带计时数据 + 预填字段）
   onGoReport() {
-    const { flightDate, takeoffTime, landingTime } = this.data;
+    const { flightDate, takeoffTime, landingTime, droneModel, missionType } = this.data;
     const totalDuration = util.diffDuration(takeoffTime, landingTime);
 
-    wx.navigateTo({
-      url: `/pages/report/report?flightDate=${flightDate}&takeoffTime=${encodeURIComponent(takeoffTime)}&landingTime=${encodeURIComponent(landingTime)}&totalDuration=${encodeURIComponent(totalDuration)}&fromTimer=1`,
-    });
+    const params = [
+      `flightDate=${flightDate}`,
+      `takeoffTime=${encodeURIComponent(takeoffTime)}`,
+      `landingTime=${encodeURIComponent(landingTime)}`,
+      `totalDuration=${encodeURIComponent(totalDuration)}`,
+      `fromTimer=1`,
+    ];
+    if (droneModel) params.push(`droneModel=${encodeURIComponent(droneModel)}`);
+    if (missionType) params.push(`missionType=${encodeURIComponent(missionType)}`);
+
+    wx.navigateTo({ url: `/pages/report/report?${params.join('&')}` });
   },
 
   // 跳过计时直接填报

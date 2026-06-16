@@ -4,6 +4,7 @@ Page({
     id: '',
     detail: null,
     loading: true,
+    readonly: false,
   },
 
   onLoad(options) {
@@ -11,7 +12,10 @@ Page({
       wx.showToast({ title: '缺少 id', icon: 'none' });
       return;
     }
-    this.setData({ id: options.id });
+    this.setData({
+      id: options.id,
+      readonly: options.readonly === '1',
+    });
     this.loadDetail();
   },
 
