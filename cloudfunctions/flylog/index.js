@@ -181,6 +181,8 @@ exports.main = async (event, context) => {
         return await myDutyStats(OPENID);
       case 'approve':
         return await approve(event, OPENID);
+      case 'batch_approve_instructor':
+        return await batchApproveInstructor(event, OPENID);
       case 'reject':
         return await reject(event, OPENID);
       case 'list_approvals':
@@ -1003,12 +1005,12 @@ async function stats(event, openid) {
 // 审批通过
 // 安全员（realName 与日志 safetyOfficer 字段匹配，角色不限）：pending_safety → pending_instructor
 // 指导教师（realName 与日志 teacher 字段匹配）：pending_instructor → approved
-// 管理员可在任意状态直接通过
+// 管理员与普通用户遵循相同规则，无法跳过审批阶段
 async function approve(event, openid) {
   const { _id, comment = '' } = event;
   if (!_id) return { success: false, message: '缺少 _id' };
 
-  const [admin, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
+  const [, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
   if (!userDoc) return { success: false, message: '未注册用户，无权操作' };
 
   let logDoc;
@@ -1032,10 +1034,7 @@ async function approve(event, openid) {
 
   let nextStatus;
 
-  if (admin) {
-    nextStatus = APPROVAL_STATUS.APPROVED;
-    logEntry.note = '管理员强制通过';
-  } else if (logDoc.approvalStatus === APPROVAL_STATUS.PENDING_SAFETY) {
+  if (logDoc.approvalStatus === APPROVAL_STATUS.PENDING_SAFETY) {
     // 安全员校验：优先用 openid 字段，兼容旧数据用 realName
     const matchByOpenid = logDoc.safetyOfficerOpenid && logDoc.safetyOfficerOpenid === openid;
     const matchByName = !logDoc.safetyOfficerOpenid && userDoc.realName && logDoc.safetyOfficer === userDoc.realName;
@@ -1068,16 +1067,90 @@ async function approve(event, openid) {
   return { success: true, data: { approvalStatus: nextStatus } };
 }
 
+// 教师一键批量审批：将当前用户作为指导教师的全部 pending_instructor 日志批量通过
+// 仅限教师角色，管理员无此权限
+async function batchApproveInstructor(event, openid) {
+  const [, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
+  if (!userDoc) return { success: false, message: '未注册用户，无权操作' };
+
+  // 仅教师可用，管理员不得使用
+  if (userDoc.role !== 'instructor') {
+    return { success: false, message: '仅指导教师可使用一键审批' };
+  }
+
+  // 查询该教师待审批的全部日志（优先 openid 匹配，兼容旧数据 realName 匹配）
+  let logs = [];
+  try {
+    const orConds = [
+      { approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR, teacherOpenid: openid },
+    ];
+    if (userDoc.realName) {
+      orConds.push(
+        _.and([
+          { approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR },
+          { teacher: userDoc.realName },
+        ]),
+      );
+    }
+    const query = orConds.length === 1 ? orConds[0] : _.or(orConds);
+    // 云数据库单次最多返回 100 条，教师待批量不会超此限制
+    const res = await db.collection(COLLECTION).where(query).limit(100).get();
+    logs = res.data || [];
+  } catch (err) {
+    if (isCollectionNotExistError(err)) return { success: true, data: { successCount: 0, failCount: 0 } };
+    throw err;
+  }
+
+  if (logs.length === 0) {
+    return { success: true, data: { successCount: 0, failCount: 0 } };
+  }
+
+  const now = formatLocalTime();
+  const operatorName = userDoc.realName || userDoc.nickName || openid;
+  const logEntry = {
+    action: 'approve',
+    operatorOpenid: openid,
+    operatorName,
+    operatorRole: userDoc.role,
+    comment: event.comment || '',
+    note: '指导教师一键审批通过',
+    time: now,
+  };
+
+  // 并发批量更新
+  let successCount = 0;
+  let failCount = 0;
+  await Promise.all(
+    logs.map(async (doc) => {
+      try {
+        await db.collection(COLLECTION).where({ _id: doc._id }).update({
+          data: {
+            approvalStatus: APPROVAL_STATUS.APPROVED,
+            approvalLog: _.push([logEntry]),
+            updateTime: db.serverDate(),
+          },
+        });
+        successCount += 1;
+      } catch (e) {
+        console.error('[batchApproveInstructor] fail for', doc._id, e);
+        failCount += 1;
+      }
+    }),
+  );
+
+  return { success: true, data: { successCount, failCount, total: logs.length } };
+}
+
 // 审批驳回
 // 安全员（realName 与日志 safetyOfficer 匹配，角色不限）可驳回 pending_safety
 // 指导教师（realName 与日志 teacher 匹配）可驳回 pending_instructor
-// 管理员可驳回任意待审批状态
+// 管理员与普通用户遵循相同规则，无法绕过身份校验
 async function reject(event, openid) {
   const { _id, comment = '' } = event;
   if (!_id) return { success: false, message: '缺少 _id' };
   if (!comment.trim()) return { success: false, message: '驳回必须填写驳回原因' };
 
-  const [admin, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
+  const [, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
   if (!userDoc) return { success: false, message: '未注册用户，无权操作' };
 
   let logDoc;
@@ -1090,29 +1163,23 @@ async function reject(event, openid) {
   }
   if (!logDoc) return { success: false, message: '日志不存在' };
 
-  const rejectableStatuses = [APPROVAL_STATUS.PENDING_SAFETY, APPROVAL_STATUS.PENDING_INSTRUCTOR];
+  // 安全员：优先 openid 匹配，兼容旧数据用 realName
+  const isSafetyOfficer =
+    logDoc.approvalStatus === APPROVAL_STATUS.PENDING_SAFETY
+    && (
+      (logDoc.safetyOfficerOpenid && logDoc.safetyOfficerOpenid === openid)
+      || (!logDoc.safetyOfficerOpenid && userDoc.realName && logDoc.safetyOfficer === userDoc.realName)
+    );
+  // 教师：优先 openid 匹配，兼容旧数据用 realName
+  const isTeacher =
+    logDoc.approvalStatus === APPROVAL_STATUS.PENDING_INSTRUCTOR
+    && (
+      (logDoc.teacherOpenid && logDoc.teacherOpenid === openid)
+      || (!logDoc.teacherOpenid && userDoc.realName && logDoc.teacher === userDoc.realName)
+    );
 
-  if (!admin) {
-    // 安全员：优先 openid 匹配，兼容旧数据用 realName
-    const isSafetyOfficer =
-      logDoc.approvalStatus === APPROVAL_STATUS.PENDING_SAFETY
-      && (
-        (logDoc.safetyOfficerOpenid && logDoc.safetyOfficerOpenid === openid)
-        || (!logDoc.safetyOfficerOpenid && userDoc.realName && logDoc.safetyOfficer === userDoc.realName)
-      );
-    // 教师：优先 openid 匹配，兼容旧数据用 realName
-    const isTeacher =
-      logDoc.approvalStatus === APPROVAL_STATUS.PENDING_INSTRUCTOR
-      && (
-        (logDoc.teacherOpenid && logDoc.teacherOpenid === openid)
-        || (!logDoc.teacherOpenid && userDoc.realName && logDoc.teacher === userDoc.realName)
-      );
-
-    if (!isSafetyOfficer && !isTeacher) {
-      return { success: false, message: '当前状态不允许操作，或您不是该日志的审批人' };
-    }
-  } else if (!rejectableStatuses.includes(logDoc.approvalStatus)) {
-    return { success: false, message: '已审批完成的日志不能再驳回' };
+  if (!isSafetyOfficer && !isTeacher) {
+    return { success: false, message: '当前状态不允许操作，或您不是该日志的审批人' };
   }
 
   const logEntry = {
@@ -1136,83 +1203,73 @@ async function reject(event, openid) {
 }
 
 // 查询待审批列表
-// 非管理员：按 realName 匹配日志中的 safetyOfficer（待安全员审批）或 teacher（待教师审批）字段，
-//           安全员可以是任意角色（学员/教师），只要填了该用户姓名即可
-// 管理员：返回所有非 approved 状态的记录
+// 所有用户（含管理员）均按身份匹配：safetyOfficer 字段匹配安全员，teacher 字段匹配教师
+// 不再为管理员提供全库查询入口
 async function listApprovals(event, openid) {
   const { pageSize = 20, pageIndex = 0, approvalStatus: filterStatus = '' } = event || {};
 
-  const [admin, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
+  const [, userDoc] = await Promise.all([isAdmin(openid), getUserInfo(openid)]);
   if (!userDoc) return { success: false, message: '未注册用户，无权操作' };
 
   const andConds = [];
 
-  if (admin) {
-    // 管理员：按状态筛选，无状态则看全部待审批
-    if (filterStatus) {
-      andConds.push({ approvalStatus: filterStatus });
-    } else {
-      andConds.push({ approvalStatus: _.neq(APPROVAL_STATUS.APPROVED) });
+  // 所有用户（含管理员）统一按 openid / realName 匹配
+  if (!userDoc.realName && !openid) return { success: false, message: '请先完善个人信息（姓名）' };
+
+  // 安全员匹配条件：新数据用 safetyOfficerOpenid，旧数据用 safetyOfficer(realName)
+  const safetyMatchNew = { approvalStatus: APPROVAL_STATUS.PENDING_SAFETY, safetyOfficerOpenid: openid };
+  const safetyMatchOld = userDoc.realName
+    ? _.and([{ approvalStatus: APPROVAL_STATUS.PENDING_SAFETY }, { safetyOfficer: userDoc.realName }])
+    : null;
+
+  // 教师匹配条件
+  const teacherMatchNew = { approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR, teacherOpenid: openid };
+  const teacherMatchOld = userDoc.realName
+    ? _.and([{ approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR }, { teacher: userDoc.realName }])
+    : null;
+
+  if (filterStatus === APPROVAL_STATUS.PENDING_SAFETY) {
+    const orConds = [safetyMatchNew];
+    if (safetyMatchOld) orConds.push(safetyMatchOld);
+    andConds.push(orConds.length === 1 ? orConds[0] : _.or(orConds));
+  } else if (filterStatus === APPROVAL_STATUS.PENDING_INSTRUCTOR) {
+    const orConds = [teacherMatchNew];
+    if (teacherMatchOld) orConds.push(teacherMatchOld);
+    andConds.push(orConds.length === 1 ? orConds[0] : _.or(orConds));
+  } else if (filterStatus === APPROVAL_STATUS.REJECTED) {
+    // 被驳回的：自己提交 OR 自己是安全员/教师
+    const rejectedConds = [
+      { _openid: openid },
+      { safetyOfficerOpenid: openid },
+      { teacherOpenid: openid },
+    ];
+    if (userDoc.realName) {
+      rejectedConds.push({ safetyOfficer: userDoc.realName });
+      rejectedConds.push({ teacher: userDoc.realName });
     }
+    andConds.push(
+      _.and([
+        { approvalStatus: APPROVAL_STATUS.REJECTED },
+        _.or(rejectedConds),
+      ]),
+    );
   } else {
-    // 非管理员：按 openid 字段匹配（兼容旧数据同时保留 realName 匹配）
-    if (!userDoc.realName && !openid) return { success: false, message: '请先完善个人信息（姓名）' };
-
-    // 安全员匹配条件：新数据用 safetyOfficerOpenid，旧数据用 safetyOfficer(realName)
-    const safetyMatchNew = { approvalStatus: APPROVAL_STATUS.PENDING_SAFETY, safetyOfficerOpenid: openid };
-    const safetyMatchOld = userDoc.realName
-      ? _.and([{ approvalStatus: APPROVAL_STATUS.PENDING_SAFETY }, { safetyOfficer: userDoc.realName }])
-      : null;
-
-    // 教师匹配条件
-    const teacherMatchNew = { approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR, teacherOpenid: openid };
-    const teacherMatchOld = userDoc.realName
-      ? _.and([{ approvalStatus: APPROVAL_STATUS.PENDING_INSTRUCTOR }, { teacher: userDoc.realName }])
-      : null;
-
-    if (filterStatus === APPROVAL_STATUS.PENDING_SAFETY) {
-      const orConds = [safetyMatchNew];
-      if (safetyMatchOld) orConds.push(safetyMatchOld);
-      andConds.push(orConds.length === 1 ? orConds[0] : _.or(orConds));
-    } else if (filterStatus === APPROVAL_STATUS.PENDING_INSTRUCTOR) {
-      const orConds = [teacherMatchNew];
-      if (teacherMatchOld) orConds.push(teacherMatchOld);
-      andConds.push(orConds.length === 1 ? orConds[0] : _.or(orConds));
-    } else if (filterStatus === APPROVAL_STATUS.REJECTED) {
-      // 被驳回的：自己提交 OR 自己是安全员/教师
-      const rejectedConds = [
-        { _openid: openid },
-        { safetyOfficerOpenid: openid },
-        { teacherOpenid: openid },
-      ];
-      if (userDoc.realName) {
-        rejectedConds.push({ safetyOfficer: userDoc.realName });
-        rejectedConds.push({ teacher: userDoc.realName });
-      }
-      andConds.push(
-        _.and([
-          { approvalStatus: APPROVAL_STATUS.REJECTED },
-          _.or(rejectedConds),
-        ]),
-      );
-    } else {
-      // 默认：和自己相关的全部待审批（作为安全员 + 作为教师 + 自己提交的非通过）
-      const orConds = [
-        safetyMatchNew,
-        teacherMatchNew,
-        _.and([{ _openid: openid }, { approvalStatus: _.neq(APPROVAL_STATUS.APPROVED) }]),
-      ];
-      if (safetyMatchOld) orConds.push(safetyMatchOld);
-      if (teacherMatchOld) orConds.push(teacherMatchOld);
-      andConds.push(_.or(orConds));
-    }
+    // 默认：和自己相关的全部待审批（作为安全员 + 作为教师 + 自己提交的非通过）
+    const orConds = [
+      safetyMatchNew,
+      teacherMatchNew,
+      _.and([{ _openid: openid }, { approvalStatus: _.neq(APPROVAL_STATUS.APPROVED) }]),
+    ];
+    if (safetyMatchOld) orConds.push(safetyMatchOld);
+    if (teacherMatchOld) orConds.push(teacherMatchOld);
+    andConds.push(_.or(orConds));
   }
 
   const whereClause = andConds.length === 1 ? andConds[0] : _.and(andConds);
 
   const emptyResult = {
     success: true,
-    data: { list: [], total: 0, pageIndex, pageSize, hasMore: false, userRole: userDoc.role, isAdmin: admin },
+    data: { list: [], total: 0, pageIndex, pageSize, hasMore: false, userRole: userDoc.role },
   };
 
   let countRes;
@@ -1259,7 +1316,6 @@ async function listApprovals(event, openid) {
       pageIndex,
       pageSize,
       hasMore: (pageIndex + 1) * pageSize < countRes.total,
-      isAdmin: admin,
       userRole: userDoc.role,
     },
   };
