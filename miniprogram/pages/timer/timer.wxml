@@ -63,6 +63,26 @@
         </picker>
       </view>
     </view>
+    <view class="prefill-row">
+      <view class="prefill-label">飞行模式</view>
+      <view class="prefill-value">
+        <picker mode="selector" range="{{flightModes}}" value="{{flightModeIndex}}" bindchange="onFlightModePick">
+          <view class="{{flightMode ? 'prefill-selected' : 'prefill-placeholder'}}">
+            {{flightMode || '请选择飞行模式'}} ▼
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="prefill-row">
+      <view class="prefill-label">空域报备</view>
+      <view class="prefill-value">
+        <picker mode="selector" range="{{airspaceCodes}}" value="{{airspaceCodeIndex}}" bindchange="onAirspaceCodePick">
+          <view class="{{airspaceCode ? 'prefill-selected' : 'prefill-placeholder'}}">
+            {{airspaceCode || '请选择空域报备编号'}} ▼
+          </view>
+        </picker>
+      </view>
+    </view>
   </view>
   <!-- 操作按钮区 -->
   <view class="action-area">

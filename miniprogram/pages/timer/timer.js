@@ -21,10 +21,16 @@ Page({
     droneModelIndex: null,
     missionType: '',
     missionTypeIndex: null,
+    flightMode: '',
+    flightModeIndex: null,
+    airspaceCode: '',
+    airspaceCodeIndex: null,
 
     // picker 选项源
     droneModels: [],
     missionTypes: [],
+    flightModes: [],
+    airspaceCodes: ['室内实训室', '室外实训场', '校外实训场'],
   },
 
   // 计时器句柄
@@ -38,6 +44,7 @@ Page({
       flightDate: util.formatDate(today),
       droneModels: app.globalData.droneModels,
       missionTypes: app.globalData.missionTypes,
+      flightModes: app.globalData.flightModes,
     });
   },
 
@@ -113,9 +120,27 @@ Page({
     });
   },
 
+  // 飞行模式 picker
+  onFlightModePick(e) {
+    const idx = Number(e.detail.value);
+    this.setData({
+      flightMode: this.data.flightModes[idx],
+      flightModeIndex: idx,
+    });
+  },
+
+  // 空域报备 picker
+  onAirspaceCodePick(e) {
+    const idx = Number(e.detail.value);
+    this.setData({
+      airspaceCode: this.data.airspaceCodes[idx],
+      airspaceCodeIndex: idx,
+    });
+  },
+
   // 进入填报页面（携带计时数据 + 预填字段）
   onGoReport() {
-    const { flightDate, takeoffTime, landingTime, droneModel, missionType } = this.data;
+    const { flightDate, takeoffTime, landingTime, droneModel, missionType, flightMode, airspaceCode } = this.data;
     const totalDuration = util.diffDuration(takeoffTime, landingTime);
 
     const params = [
@@ -127,6 +152,8 @@ Page({
     ];
     if (droneModel) params.push(`droneModel=${encodeURIComponent(droneModel)}`);
     if (missionType) params.push(`missionType=${encodeURIComponent(missionType)}`);
+    if (flightMode) params.push(`flightMode=${encodeURIComponent(flightMode)}`);
+    if (airspaceCode) params.push(`airspaceCode=${encodeURIComponent(airspaceCode)}`);
 
     wx.navigateTo({ url: `/pages/report/report?${params.join('&')}` });
   },
@@ -177,4 +204,5 @@ Page({
     const pad = (n) => (n < 10 ? '0' + n : '' + n);
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   },
+
 });

@@ -500,6 +500,82 @@
   border-color: #ff4d4f;
 }
 
+/* ============ 一键审批悬浮按钮 ============ */
+.batch-approve-fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: 120rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  background: linear-gradient(135deg, #0052d9 0%, #4e9af1 100%);
+  border-radius: 100rpx;
+  padding: 22rpx 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 82, 217, .45);
+  z-index: 100;
+}
+
+.batch-approve-fab:active {
+  transform: scale(.96);
+}
+
+.batch-approve-fab--loading {
+  opacity: .75;
+}
+
+.batch-approve-fab-text {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ============ 一键审批弹窗内容 ============ */
+.batch-dialog-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  background-color: #fffbe6;
+  border: 1rpx solid #ffe58f;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.batch-dialog-tip-text {
+  font-size: 26rpx;
+  color: #d48806;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.batch-dialog-scroll {
+  max-height: 400rpx;
+}
+
+.batch-dialog-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 4rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.batch-dialog-item:last-child {
+  border-bottom: 0;
+}
+
+.batch-dialog-code {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.batch-dialog-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
 /* 被驳回时操作区 */
 .reject-reason-box {
   background-color: #fff2f0;

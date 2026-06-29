@@ -91,6 +91,17 @@ module.exports = { formatTime: formatTime };
     <view class="loading-wrap" wx:if="{{logLoading && logList.length === 0}}">
       <t-loading theme="circular" size="60rpx" />
     </view>
+
+    <!-- 一键审批悬浮按钮：仅教师 且 当前为「待教师」tab 时显示 -->
+    <view
+      wx:if="{{userRole === 'instructor' && logFilterStatus === 'pending_instructor'}}"
+      class="batch-approve-fab {{batchApproving ? 'batch-approve-fab--loading' : ''}}"
+      bindtap="onBatchApprove"
+    >
+      <t-loading wx:if="{{batchApproving}}" theme="circular" size="36rpx" color="#fff" />
+      <t-icon wx:else name="check-circle" size="40rpx" color="#fff" />
+      <text class="batch-approve-fab-text">{{batchApproving ? '审批中' : '一键审批'}}</text>
+    </view>
   </block>
 
   <!-- ============ 用户注册审批：列表视图 ============ -->
@@ -457,5 +468,33 @@ module.exports = { formatTime: formatTime };
       maxlength="200"
       auto-height
     />
+  </view>
+</t-dialog>
+
+<!-- 一键审批确认弹窗 -->
+<t-dialog
+  visible="{{showBatchApproveDialog}}"
+  title="一键审批确认"
+  confirm-btn="{{batchConfirmBtn}}"
+  cancel-btn="取消"
+  bindconfirm="doBatchApprove"
+  bindcancel="closeBatchApproveDialog"
+  bindclose="closeBatchApproveDialog"
+>
+  <view slot="content" class="dialog-content">
+    <view class="batch-dialog-tip">
+      <t-icon name="info-circle" size="32rpx" color="#fa8c16" />
+      <text class="batch-dialog-tip-text">共 {{batchPendingList.length}} 条日志待您教师审批，确认后将全部通过。</text>
+    </view>
+    <scroll-view scroll-y class="batch-dialog-scroll">
+      <view
+        wx:for="{{batchPendingList}}"
+        wx:key="_id"
+        class="batch-dialog-item"
+      >
+        <text class="batch-dialog-code">{{item.logCode}}</text>
+        <text class="batch-dialog-desc">{{item.pilotName}} · {{item.flightDate}}</text>
+      </view>
+    </scroll-view>
   </view>
 </t-dialog>

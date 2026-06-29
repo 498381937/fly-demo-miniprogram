@@ -258,6 +258,7 @@
               <text>点击此处手写签名</text>
             </view>
           </view>
+          <view wx:if="{{errors.signatureImage}}" class="text-error">{{errors.signatureImage}}</view>
           <view class="signature-actions" wx:if="{{signatureImage}}">
             <view class="link" bindtap="clearSignature">清除签名</view>
             <view class="link" bindtap="openSignature">重新签名</view>

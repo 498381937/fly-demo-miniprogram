@@ -76,6 +76,7 @@ Page({
 
     // 来自计时页：自动填充飞行日期、起飞/降落时间、总时长，以及预填字段
     if (options && options.fromTimer) {
+      /** @type {Record<string, any>} */
       const patch = {};
       if (options.flightDate) patch.flightDate = options.flightDate;
       if (options.takeoffTime) patch.takeoffTime = decodeURIComponent(options.takeoffTime);
@@ -92,6 +93,16 @@ Page({
         const missionIdx = this.data.missionTypes.indexOf(mission);
         patch.missionTypeIndex = missionIdx;
         patch.showRouteIntegrity = missionIdx >= 4;
+      }
+      if (options.flightMode) {
+        const mode = decodeURIComponent(options.flightMode);
+        patch.flightMode = mode;
+        patch.flightModeIndex = this.data.flightModes.indexOf(mode);
+      }
+      if (options.airspaceCode) {
+        const code = decodeURIComponent(options.airspaceCode);
+        patch.airspaceCode = code;
+        patch.airspaceCodeIndex = this.data.airspaceCodes.indexOf(code);
       }
       if (Object.keys(patch).length) {
         this.setData(patch);
@@ -288,6 +299,7 @@ Page({
       events: {
         signatureReturn: (data) => {
           this.setData({ signatureImage: data.url });
+          this.clearError('signatureImage');
         },
       },
     });
@@ -344,6 +356,11 @@ Page({
       errors.ratingRouteIntegrity = '请为「航线完整」打分';
     }
 
+    // Tab2 签名必填
+    if (!d.signatureImage) {
+      errors.signatureImage = '请完成记录人电子签名';
+    }
+
     return errors;
   },
 
@@ -351,7 +368,6 @@ Page({
     const errors = this.validate();
     if (Object.keys(errors).length > 0) {
       this.setData({ errors });
-      debugger;
       const baseFields = [
         'flightDate', 'takeoffTime', 'landingTime', 'pilotName', 'pilotId',
         'className', 'teacher', 'safetyOfficer', 'droneModel', 'missionType', 'flightMode', 'airspaceCode',

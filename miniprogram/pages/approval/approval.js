@@ -81,6 +81,12 @@ Page({
     operating: false,
     approveConfirmBtn: { content: '确认通过', theme: 'primary' },
     rejectConfirmBtn: { content: '确认驳回', theme: 'danger' },
+
+    // ---- 一键审批 ----
+    showBatchApproveDialog: false,   // 二次确认弹窗
+    batchPendingList: [],            // 待批列表摘要
+    batchApproving: false,           // 批量审批进行中
+    batchConfirmBtn: { content: '全部审批通过', theme: 'primary' },
   },
 
   onLoad() {
@@ -481,6 +487,81 @@ Page({
         wx.hideLoading();
         this.setData({ operating: false });
         wx.showToast({ title: '网络异常', icon: 'none' });
+      });
+  },
+
+  // ============ 一键审批（仅教师/管理员，针对教师审批阶段）============
+
+  // 点击「一键审批」按钮：先拉取待批列表用于展示摘要
+  onBatchApprove() {
+    if (this.data.batchApproving) return;
+    wx.showLoading({ title: '获取待办...', mask: true });
+
+    wx.cloud
+      .callFunction({
+        name: 'flylog',
+        data: {
+          action: 'list_approvals',
+          pageIndex: 0,
+          pageSize: 100,
+          approvalStatus: LOG_STATUS.PENDING_INSTRUCTOR,
+        },
+      })
+      .then((res) => {
+        wx.hideLoading();
+        if (!res.result || !res.result.success) {
+          wx.showToast({ title: '获取待办失败', icon: 'none' });
+          return;
+        }
+    const allPending = (res.result.data.list || []).filter((item) => this._canApproveLog(item, false));
+        if (allPending.length === 0) {
+          wx.showToast({ title: '暂无待您审批的教师待办', icon: 'none' });
+          return;
+        }
+        this.setData({
+          batchPendingList: allPending,
+          showBatchApproveDialog: true,
+        });
+      })
+      .catch(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '网络异常', icon: 'none' });
+      });
+  },
+
+  closeBatchApproveDialog() {
+    this.setData({ showBatchApproveDialog: false });
+  },
+
+  // 确认后执行批量审批
+  doBatchApprove() {
+    if (this.data.batchApproving) return;
+    this.setData({ showBatchApproveDialog: false, batchApproving: true });
+    wx.showLoading({ title: '批量审批中...', mask: true });
+
+    wx.cloud
+      .callFunction({
+        name: 'flylog',
+        data: { action: 'batch_approve_instructor' },
+      })
+      .then((res) => {
+        wx.hideLoading();
+        this.setData({ batchApproving: false });
+        if (res.result && res.result.success) {
+          const { successCount, failCount } = res.result.data;
+          const msg = failCount > 0
+            ? `完成 ${successCount} 条，${failCount} 条失败`
+            : `已成功审批 ${successCount} 条日志`;
+          wx.showToast({ title: msg, icon: 'success', duration: 2000 });
+          this._resetLogList();
+        } else {
+          wx.showToast({ title: (res.result && res.result.message) || '批量审批失败', icon: 'none' });
+        }
+      })
+      .catch(() => {
+        wx.hideLoading();
+        this.setData({ batchApproving: false });
+        wx.showToast({ title: '网络异常，请重试', icon: 'none' });
       });
   },
 
